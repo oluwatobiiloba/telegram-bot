@@ -7,7 +7,18 @@ const openAI_API = axios.create({
     headers: { 'Authorization': `Bearer ${process.env.OPEN_AI_TOKEN}` }
 });
 const fs = require('fs');
-bot.setWebHook(`https://telegram-chatbot.azurewebsites.net/api/chatbox`);
+bot.setWebHook(process.env.BOT_WEBHOOK, {
+    allowed_updates: ['message', 'edited_message', 'channel_post', 'edited_channel_post', 'inline_query', 'chosen_inline_result', 'callback_query', 'shipping_query', 'pre_checkout_query', 'poll', 'poll_answer']
+
+});
+bot.on('polling_error', (error) => {
+    if (error.code === 'ETELEGRAM') {
+        console.log('Telegram bot instance already running. Exiting...');
+        process.exit(1);
+    } else {
+        console.log('An error occurred:', error);
+    }
+});
 const { CosmosClient } = require('@azure/cosmos');
 const { endpoint, key, database, container } = {
     endpoint: process.env.COSMO_ENDPOINT,
@@ -15,7 +26,7 @@ const { endpoint, key, database, container } = {
     database: { id: 'ChatDB' },
     container: { id: 'chatHistory' }
 };
-console.log(endpoint, key, database, container)
+
 
 const options = {
     endpoint,
