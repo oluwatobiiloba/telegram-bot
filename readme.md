@@ -1,3 +1,5 @@
+[![Build and deploy Node.js project to Azure Function App - chat-Assist-Bot](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/master_chat-assist-bot.yml/badge.svg)](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/master_chat-assist-bot.yml)
+
 # Maya - An AI Chatbot with Telegram Integration
 
 Maya is an intelligent chatbot utilizing the power of OpenAI's GPT-3, Dall-E, and 3.5-turbo models to generate human-like responses and images to user queries. The app is hosted on Azure Functions and stores chat history on Cosmos DB.
