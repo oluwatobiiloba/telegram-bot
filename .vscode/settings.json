@@ -1,4 +1,5 @@
 {
+    "azureAutomation.directory.basePath": "Users/oluwatobilobaaremu/Documents/Projects/telegram-bot",
     "azureFunctions.deploySubpath": ".",
     "azureFunctions.postDeployTask": "npm install (functions)",
     "azureFunctions.projectLanguage": "JavaScript",
@@ -6,5 +7,5 @@
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.projectLanguageModel": 4,
     "azureFunctions.preDeployTask": "npm prune (functions)",
-    "dotenv.enableAutocloaking": false
+    "dotenv.enableAutocloaking": false,
 }

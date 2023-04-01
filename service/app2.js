@@ -5,12 +5,13 @@ const openAI_API = axios.create({
     headers: { 'Authorization': `Bearer ${process.env.OPEN_AI_TOKEN}` }
 });
 const cosmo_surfer = require('./cosmo_util')
+const spotify_helper = require('./spotify_helper')
 
 
 
 module.exports = async function (context, request, database, container, bot) {
     const body = await request.json();
-    context.log("Request body", body);
+
 
     if (body.my_chat_member) {
         bot.sendMessage(body.my_chat_member.chat.id, "🤖")
@@ -31,7 +32,7 @@ module.exports = async function (context, request, database, container, bot) {
     }
     const { chat: { id: chatId } } = body.message;
     try {
-        context.log("Request body", request.body);
+
 
         let messages = await cosmo_surfer.getChatHistory(chatId, database, container);
         messages.push({ role: "user", content: body.message.text });
@@ -43,7 +44,6 @@ module.exports = async function (context, request, database, container, bot) {
 
         switch (true) {
             case prompt_req.includes("create an image"):
-                context.log("Request body", body);
                 const imageMessage = prompt_req.replace("create an image", "");
                 const imageResponse = await openAI_API.post('/images/generations', {
                     prompt: imageMessage,
@@ -55,15 +55,48 @@ module.exports = async function (context, request, database, container, bot) {
                     type: 'photo',
                     media: url.url
                 }));
-                const chatResponse = await bot.sendMediaGroup(chatId, media);
-                context.log(chatResponse);
+                await bot.sendMediaGroup(chatId, media);
                 messages.push({ role: "assistant", content: imageUrls });
-                context.log(messages);
                 await cosmo_surfer.updateChatHistory(chatId, messages, database, container);
                 return {
                     status: 200,
                     body: response.data.choices[0].message.content,
                 }
+            case prompt_req.includes("create a playlist"):
+                context.log("Creating a playlist", body);
+                await bot.sendMessage(chatId, "You'll have to give me a minute, I'll send your playlist once I'm done");
+                let playlistMessage = prompt_req.replace("create a playlist", "Can you recommend 10 songs that I might enjoy, return them in JSON body with each song in this format (name,artist,album)");
+                const playlist_response = await openAI_API.post('/chat/completions', {
+                    model: "gpt-3.5-turbo",
+                    temperature: 0.7,
+                    messages: [{ role: "user", content: playlistMessage }]
+                });
+                await bot.sendMessage(chatId, "still working on it...");
+                let songs = playlist_response.data.choices[0].message.content
+                const spotify_query = JSON.parse(songs.substring(songs.indexOf("["), songs.lastIndexOf("]") + 1));
+                const spotify_access_token = await spotify_helper.refreshAccessToken(process.env.REFRESH_TOKEN);
+                const spotify_IDs = await spotify_helper.searchSongs(spotify_query, spotify_access_token, context);
+
+                if (spotify_IDs) {
+                    let spotify_user_id = process.env.SPOTIFY_USER_ID
+                    let username = body.message?.from?.first_name
+                    const add_track = await spotify_helper.addSongsToPlaylist(spotify_user_id, username, spotify_IDs, spotify_access_token, context);
+                    context.log("Add Track", add_track);
+                    await bot.sendMessage(chatId, `Here's your playlist : ${add_track}`);
+                    return {
+                        status: 200,
+                        add_track
+                    };
+
+                } else {
+                    bot.sendMessage(chatId, "I'm sorry, I couldn't process this request. Please try again in a minute.");
+                    return {
+                        status: 200,
+                        message: 'I\'m sorry, I couldn\'t process this request. Please try again in a minute'
+                    }
+                }
+
+
             case prompt_req === "/clear":
                 context.log("Clearing chat history");
                 await cosmo_surfer.deleteChatHistory(chatId, database, container);
