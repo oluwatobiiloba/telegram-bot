@@ -44,7 +44,7 @@ Maya is built with the following technologies:
 - Cosmos DB - A multi-model database service provided by Microsoft that provides scalable, low-latency access to NoSQL data.
 - OpenAI - An artificial intelligence research lab that offers a variety of natural language processing (NLP) and machine learning (ML) models.
 - Telegram - A messaging API that allows developers to interact with the Telegram platform and build chatbots.
-- Spotify API - An API for interacting with the Spotify music streaming service.
+- Spotify API - Spotify music streaming API services.
 
 ## Conclusion
 
