@@ -116,7 +116,7 @@ module.exports = async function (context, request, database, container, bot) {
                 try {
                     spotify_query = JSON.parse(songs.substring(songs.indexOf('['), songs.lastIndexOf(']') + 1))
                 } catch (error) {
-                    context.log('Error parsing Songs', err);
+                    context.log('Error parsing Songs', error);
                     await bot.sendMessage(chatId, "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts.");
                 }
 
