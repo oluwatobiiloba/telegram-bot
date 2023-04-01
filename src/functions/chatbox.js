@@ -11,6 +11,6 @@ app.http('chatbox', {
         const bot = new TelegramBot(process.env.BOT_TOKEN);
         bot.setWebHook(process.env.BOT_WEBHOOK);
         let response = await application(context, request, 'ChatDB', 'chatHistory', bot)
-        return { body: response }
+        return { response }
     }
 });
