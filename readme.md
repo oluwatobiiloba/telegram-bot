@@ -34,7 +34,6 @@ Maya can also create playlists on Spotify using OpenAI prompts and Spotify API. 
 
 To get your Spotify token, run the script in the `spotify_auth.js` file with the node command. Navigate to the `/login` endpoint, authorize your app to connect with Spotify, and you'll be redirected to a page that displays the auth token. You should retrieve your refresh token from the console. You will need to create an app on Spotify dashboard, with the redirect URL set to `http://localhost:8888/callback`.
 
-Remember to include this new information in the installation and usage instructions of the README file to ensure that users are aware of how to use this new feature.
 ## Technologies Used
 
 Maya is built with the following technologies:
