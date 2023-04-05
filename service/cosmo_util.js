@@ -92,5 +92,22 @@ module.exports = {
         } catch (error) {
             console.log(error);
         }
+    },
+
+    // A function to upload documents to the database
+    async uploadDocument(document, database, container) {
+        try {
+            await client.database(database).container(container).items.create({
+                id: document.id,
+                partitionKey: document.id,
+                document: document,
+                chatId: document.chatId
+            });
+
+        } catch (error) {
+            console.log(error);
+        }
+        return document;
     }
+
 }
