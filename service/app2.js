@@ -4,8 +4,6 @@ const spotify_helper = require('./spotify_helper');
 const { PDFDocument } = require('pdf-lib');
 const pdfParse = require('pdf-parse');
 const { BlobServiceClient } = require("@azure/storage-blob")
-const FormData = require('form-data');
-const { Readable } = require('stream');
 const openAI_API = axios.create({
     baseURL: process.env.OPEN_AI_URL,
     headers: { Authorization: `Bearer ${process.env.OPEN_AI_TOKEN}` },
@@ -16,7 +14,7 @@ const { jsPDF } = require('jspdf');
 module.exports = async function (context, request, database, container, bot) {
     const body = await request.json();
     context.log('Request body', body);
-    bot.sendMessage(body.message.chat.id, "I'm currently undergoing maintenance. You may run into some errors with your prompts")
+
     context.log('Request body', body);
     //Check for bot kick event and video_note messages
     if (body.my_chat_member) {
@@ -34,41 +32,39 @@ module.exports = async function (context, request, database, container, bot) {
             body: "Video note received, but I'm incapable of processing video notes.",
         };
     } else if (body.message.document && body.message.document.mime_type === 'application/pdf' && body.message.document.file_name.includes("resume")) {
-        context.log('Document received');
+        context.log('resume received');
         bot.sendMessage(body.message.chat.id, "On it!");
         try {
             const chatId = body.message.chat.id;
             const fileId = body.message.document.file_id;
-            const fileUrl = await bot.getFileLink(fileId);
-            const file = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-
             const fileName = body.message.document.file_name;
-            const fileExtension = fileName.split('.').pop();
 
-            const text = await pdfParse(file.data);
+            const fileUrl = await bot.getFileLink(fileId);
+            const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
 
-            //const text = await pages[0].getText();
-            const openaiPromptMessage = `Improve the resume below. Add a professional summary that empasizes the skills relevant to the educatinal background,role, and experience. highlight . Ensure your response does not contain characters that cannot be encoded by common text encodings.  ${text.text}`;
+            const text = await pdfParse(fileResponse.data);
+
+            const openaiPromptMessage = `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. Highlight. Ensure your response does not contain characters that cannot be encoded by common text encodings. ${text.text}`;
             const cleanText = openaiPromptMessage.replace(/[^\x00-\x7F]/g, '-').replace(/[\u2022-\u2027\u25AA-\u25FF]/g, '-');
 
-            let file_response = await openAI_API.post('/chat/completions', {
+            const file_response = await openAI_API.post('/chat/completions', {
                 model: 'gpt-3.5-turbo',
                 messages: [{ role: 'user', content: cleanText }],
-
             });
 
-            bot.sendMessage(body.message.chat.id, "I'm writing your resume!🤖🤖");
+
+            bot.sendMessage(chatId, "I'm writing your resume!🤖🤖");
 
             let resume = file_response.data.choices[0].message.content;
             resume = `${resume}`
-            let final_resume = resume.replace(/""/g, "");
+            const final_resume = resume.replace(/""/g, "");
+
             const doc = new jsPDF();
             doc.setFontSize(12);
             doc.setLineHeightFactor(1.2);
 
             // split the text into an array of lines
             const textLines = doc.splitTextToSize(final_resume, doc.internal.pageSize.width - 20);
-            context.log("text lines", textLines.length)
 
             // loop over the lines and add them to the PDF
             let y = 10;
@@ -89,60 +85,65 @@ module.exports = async function (context, request, database, container, bot) {
                 doc.text(textLines[i], 10, y);
                 y += contentHeight + doc.getLineHeightFactor();
             }
+
             const modifiedPdfBytes = doc.output('arraybuffer');
 
-            const container_name = 'pdf'
-            const blob_name = `${fileName}${fileId}${chatId}.${fileExtension}`
+            const containerName = 'pdf'
+            const blobName = `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
             const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_ACCOUNT_NAME);
-            const containerClient = blobServiceClient.getContainerClient(container_name);
-            const blockBlobClient = containerClient.getBlockBlobClient(blob_name);
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
             await blockBlobClient.upload(modifiedPdfBytes, modifiedPdfBytes.byteLength, {
                 blobHTTPHeaders: {
                     blobContentType: 'application/pdf'
                 },
-                fileName: `${fileName}${fileId}${chatId}${fileExtension}`
+                fileName: `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
             });
-            context.log("blob url", blockBlobClient.url)
-            await bot.sendMessage(body.message.chat.id, `Here's your improved resume! : ${blockBlobClient.url}`);
-            await bot.sendMessage(body.message.chat.id, `Hope it helps!`);
 
+            await bot.sendMessage(chatId, `Here's your improved resume! : ${blockBlobClient.url}`);
+            await bot.sendMessage(chatId, `Hope it helps!`);
         } catch (error) {
-            context.log(error)
+            context.error("Error occurred:", error);
+            return {
+                status: 500,
+                body: `Document received, but An internal error occurred while processing the request. ${error}`,
+            };
         }
+
         return {
-            status: 200,
+            status: 500,
             body: "Document received, but I'm incapable of processing documents.",
         };
     } else if (body.message.document && body.message.document.mime_type === 'application/pdf') {
         context.log('Document received');
         bot.sendMessage(body.message.chat.id, "On it!");
+
         try {
             const chatId = body.message.chat.id;
             const fileId = body.message.document.file_id;
-            const fileUrl = await bot.getFileLink(fileId);
-            const file = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-
             const fileName = body.message.document.file_name;
-            const fileExtension = fileName.split('.').pop();
 
-            const text = await pdfParse(file.data);
+            const fileUrl = await bot.getFileLink(fileId);
+            const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
 
-            //const text = await pages[0].getText();
-            const openaiPromptMessage = `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.  ${text.text}`;
+            const text = await pdfParse(fileResponse.data);
+
+            const openaiPromptMessage = `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.  ${text.text}`
             const cleanText = openaiPromptMessage.replace(/[^\x00-\x7F]/g, '-').replace(/[\u2022-\u2027\u25AA-\u25FF]/g, '-');
 
-            let file_response = await openAI_API.post('/chat/completions', {
+            const file_response = await openAI_API.post('/chat/completions', {
                 model: 'gpt-3.5-turbo',
                 messages: [{ role: 'user', content: cleanText }],
-
             });
 
-            bot.sendMessage(body.message.chat.id, "I'm optimizing your document!🤖🤖");
+
+            bot.sendMessage(chatId, "I'm writing your resume!🤖🤖");
 
             let resume = file_response.data.choices[0].message.content;
             resume = `${resume}`
-            let final_resume = resume.replace(/""/g, "");
+            const final_resume = resume.replace(/""/g, "");
+
             const doc = new jsPDF();
             doc.setFontSize(12);
             doc.setLineHeightFactor(1.2);
@@ -169,25 +170,30 @@ module.exports = async function (context, request, database, container, bot) {
                 doc.text(textLines[i], 10, y);
                 y += contentHeight + doc.getLineHeightFactor();
             }
+
             const modifiedPdfBytes = doc.output('arraybuffer');
 
-            const container_name = 'pdf'
-            const blob_name = `${fileName}${fileId}${chatId}.${fileExtension}`
+            const containerName = 'pdf'
+            const blobName = `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
             const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_ACCOUNT_NAME);
-            const containerClient = blobServiceClient.getContainerClient(container_name);
-            const blockBlobClient = containerClient.getBlockBlobClient(blob_name);
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
             await blockBlobClient.upload(modifiedPdfBytes, modifiedPdfBytes.byteLength, {
                 blobHTTPHeaders: {
                     blobContentType: 'application/pdf'
                 },
-                fileName: `${fileName}${fileId}${chatId}${fileExtension}`
+                fileName: `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
             });
-            await bot.sendMessage(body.message.chat.id, `Here's your improved document! : ${blockBlobClient.url}`);
-            await bot.sendMessage(body.message.chat.id, `Hope it helps!`);
 
+            await bot.sendMessage(chatId, `Here's your improved Document! : ${blockBlobClient.url}`);
+            await bot.sendMessage(chatId, `Hope it helps!`);
         } catch (error) {
-            context.log(error)
+            context.error("Error occurred:", error);
+            return {
+                status: 500,
+                body: `Document received, but An internal error occurred while processing the request. ${error}`,
+            };
         }
         return {
             status: 200,
