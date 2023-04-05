@@ -1,14 +1,21 @@
 const axios = require('axios');
 const cosmo_surfer = require('./cosmo_util');
 const spotify_helper = require('./spotify_helper');
-
+const { PDFDocument } = require('pdf-lib');
+const pdfParse = require('pdf-parse');
+const { BlobServiceClient } = require("@azure/storage-blob")
 const openAI_API = axios.create({
     baseURL: process.env.OPEN_AI_URL,
     headers: { Authorization: `Bearer ${process.env.OPEN_AI_TOKEN}` },
 });
 
+const { jsPDF } = require('jspdf');
+
 module.exports = async function (context, request, database, container, bot) {
     const body = await request.json();
+    context.log('Request body', body);
+
+    context.log('Request body', body);
     //Check for bot kick event and video_note messages
     if (body.my_chat_member) {
         bot.sendMessage(body.my_chat_member.chat.id, '🤖');
@@ -17,14 +24,183 @@ module.exports = async function (context, request, database, container, bot) {
             status: 200,
             body: 'User kicked me out of the group',
         };
-    } else if (body.video_note) {
+    } else if (body.message.video_note) {
         context.log('Video note received');
         bot.sendMessage(body.message.chat.id, "I'm incapable of processing video notes.");
         return {
             status: 200,
             body: "Video note received, but I'm incapable of processing video notes.",
         };
+    } else if (body.message.document && body.message.document.mime_type === 'application/pdf' && body.message.document.file_name.includes("resume")) {
+        context.log('resume received');
+        bot.sendMessage(body.message.chat.id, "On it!");
+        try {
+            const chatId = body.message.chat.id;
+            const fileId = body.message.document.file_id;
+            const fileName = body.message.document.file_name;
+
+            const fileUrl = await bot.getFileLink(fileId);
+            const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+
+            const text = await pdfParse(fileResponse.data);
+
+            const openaiPromptMessage = `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. Highlight. Ensure your response does not contain characters that cannot be encoded by common text encodings. ${text.text}`;
+            const cleanText = openaiPromptMessage.replace(/[^\x00-\x7F]/g, '-').replace(/[\u2022-\u2027\u25AA-\u25FF]/g, '-');
+
+            const file_response = await openAI_API.post('/chat/completions', {
+                model: 'gpt-3.5-turbo',
+                messages: [{ role: 'user', content: cleanText }],
+            });
+
+
+            bot.sendMessage(chatId, "I'm writing your resume!🤖🤖");
+
+            let resume = file_response.data.choices[0].message.content;
+            resume = `${resume}`
+            const final_resume = resume.replace(/""/g, "");
+
+            const doc = new jsPDF();
+            doc.setFontSize(12);
+            doc.setLineHeightFactor(1.2);
+
+            // split the text into an array of lines
+            const textLines = doc.splitTextToSize(final_resume, doc.internal.pageSize.width - 20);
+
+            // loop over the lines and add them to the PDF
+            let y = 10;
+            for (let i = 0; i < textLines.length; i++) {
+                // calculate the y position based on the current page
+                const pageHeight = doc.internal.pageSize.height - 20;
+                const contentHeight = doc.getTextDimensions(textLines[i]).h;
+                const remainingHeight = pageHeight - y;
+                if (contentHeight > remainingHeight) {
+                    doc.addPage();
+                    y = 10;
+                }
+                y += doc.getLineHeightFactor();
+                if (y > pageHeight) {
+                    doc.addPage();
+                    y = 10;
+                }
+                doc.text(textLines[i], 10, y);
+                y += contentHeight + doc.getLineHeightFactor();
+            }
+
+            const modifiedPdfBytes = doc.output('arraybuffer');
+
+            const containerName = 'pdf'
+            const blobName = `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
+            const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_ACCOUNT_NAME);
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+            await blockBlobClient.upload(modifiedPdfBytes, modifiedPdfBytes.byteLength, {
+                blobHTTPHeaders: {
+                    blobContentType: 'application/pdf'
+                },
+                fileName: `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
+            });
+
+            await bot.sendMessage(chatId, `Here's your improved resume! : ${blockBlobClient.url}`);
+            await bot.sendMessage(chatId, `Hope it helps!`);
+        } catch (error) {
+            context.error("Error occurred:", error);
+            return {
+                status: 500,
+                body: `Document received, but An internal error occurred while processing the request. ${error}`,
+            };
+        }
+
+        return {
+            status: 500,
+            body: "Document received, but I'm incapable of processing documents.",
+        };
+    } else if (body.message.document && body.message.document.mime_type === 'application/pdf') {
+        context.log('Document received');
+        bot.sendMessage(body.message.chat.id, "On it!");
+
+        try {
+            const chatId = body.message.chat.id;
+            const fileId = body.message.document.file_id;
+            const fileName = body.message.document.file_name;
+
+            const fileUrl = await bot.getFileLink(fileId);
+            const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+
+            const text = await pdfParse(fileResponse.data);
+
+            const openaiPromptMessage = `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.  ${text.text}`
+            const cleanText = openaiPromptMessage.replace(/[^\x00-\x7F]/g, '-').replace(/[\u2022-\u2027\u25AA-\u25FF]/g, '-');
+
+            const file_response = await openAI_API.post('/chat/completions', {
+                model: 'gpt-3.5-turbo',
+                messages: [{ role: 'user', content: cleanText }],
+            });
+
+
+            bot.sendMessage(chatId, "I'm writing your resume!🤖🤖");
+
+            let resume = file_response.data.choices[0].message.content;
+            resume = `${resume}`
+            const final_resume = resume.replace(/""/g, "");
+
+            const doc = new jsPDF();
+            doc.setFontSize(12);
+            doc.setLineHeightFactor(1.2);
+
+            // split the text into an array of lines
+            const textLines = doc.splitTextToSize(final_resume, doc.internal.pageSize.width - 20);
+
+            // loop over the lines and add them to the PDF
+            let y = 10;
+            for (let i = 0; i < textLines.length; i++) {
+                // calculate the y position based on the current page
+                const pageHeight = doc.internal.pageSize.height - 20;
+                const contentHeight = doc.getTextDimensions(textLines[i]).h;
+                const remainingHeight = pageHeight - y;
+                if (contentHeight > remainingHeight) {
+                    doc.addPage();
+                    y = 10;
+                }
+                y += doc.getLineHeightFactor();
+                if (y > pageHeight) {
+                    doc.addPage();
+                    y = 10;
+                }
+                doc.text(textLines[i], 10, y);
+                y += contentHeight + doc.getLineHeightFactor();
+            }
+
+            const modifiedPdfBytes = doc.output('arraybuffer');
+
+            const containerName = 'pdf'
+            const blobName = `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
+            const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_ACCOUNT_NAME);
+            const containerClient = blobServiceClient.getContainerClient(containerName);
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+            await blockBlobClient.upload(modifiedPdfBytes, modifiedPdfBytes.byteLength, {
+                blobHTTPHeaders: {
+                    blobContentType: 'application/pdf'
+                },
+                fileName: `${fileName}${fileId}${chatId}.${fileName.split('.').pop()}`
+            });
+
+            await bot.sendMessage(chatId, `Here's your improved Document! : ${blockBlobClient.url}`);
+            await bot.sendMessage(chatId, `Hope it helps!`);
+        } catch (error) {
+            context.error("Error occurred:", error);
+            return {
+                status: 500,
+                body: `Document received, but An internal error occurred while processing the request. ${error}`,
+            };
+        }
+        return {
+            status: 200,
+            body: "Document received, but an error occured while processing",
+        };
     }
+
 
   //retrieve chat ID
     const { chat: { id: chatId } } = body.message;
@@ -37,7 +213,6 @@ module.exports = async function (context, request, database, container, bot) {
         //retrieve prompt for non-conversation messages
         const prompt_req = body.message.text.toLowerCase();
         let imageUrls = [];
-        let response = null;
 
         switch (true) {
             case prompt_req === '/clear':
@@ -104,7 +279,7 @@ module.exports = async function (context, request, database, container, bot) {
                 );
                 const playlist_response = await openAI_API.post('/chat/completions', {
                     model: 'gpt-3.5-turbo',
-                    temperature: 0.7,
+                    temperature: 0.5,
                     messages: [{ role: 'user', content: playlistMessage }],
                 }).catch(async (err) => {
                     context.log('Error getting response from OpenAi', err);
@@ -151,11 +326,10 @@ module.exports = async function (context, request, database, container, bot) {
                         message: 'No songs recommended.',
                     };
                 }
-
             default:
                 const history = messages;
                 if (messages?.length > 7) messages.shift();
-                context.log('messages---------', messages);
+
                 const prompt_message = messages.filter((msg) => {
                     if (msg.role === 'assistant' && msg.content?.length > 1000) {
                         return false;
@@ -166,7 +340,7 @@ module.exports = async function (context, request, database, container, bot) {
                     }
                     return true;
                 });
-                response = await openAI_API.post('/chat/completions', {
+                let response = await openAI_API.post('/chat/completions', {
                     model: 'gpt-3.5-turbo',
                     messages: prompt_message,
                 });

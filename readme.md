@@ -1,9 +1,10 @@
 [![Build and deploy Node.js project to Azure Function App - chat-Assist-Bot](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/master_chat-assist-bot.yml/badge.svg)](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/master_chat-assist-bot.yml)
-# Maya - An AI Chatbot with Telegram Integration
 
-Maya is an intelligent chatbot utilizing the power of OpenAI's GPT-3, Dall-E, and 3.5-turbo models to generate human-like responses and images to user queries. The app is hosted on Azure Functions and stores chat history on Cosmos DB.
+# Maya - An AI Chatbot with Telegram Integration and Document Editing Capabilities
 
-This implementation is an improvement on the original version by @timilehinshodiya that integrates Maya with Telegram bot API. The bot responds to prompts received from users on Telegram with generated responses and images.
+Maya is an intelligent chatbot that integrates with OpenAI's GPT-3, Dall-E, and 3.5-turbo models to generate human-like responses and images to user queries. The app is hosted on Azure Functions and stores chat history on Cosmos DB.
+
+In addition to the original features, Maya now offers document editing capabilities using Azure Blob Services. Users can send their documents or resumes to Maya for improvements, and the bot will respond with a link to the improved PDF file.
 
 ## Installation and Setup
 
@@ -19,6 +20,7 @@ This implementation is an improvement on the original version by @timilehinshodi
    - `CLIENT_ID`: Your Spotify app client ID
    - `CLIENT_SECRET`: Your Spotify app client secret
    - `REFRESH_TOKEN`: Your Spotify app refresh token
+   - `AZURE_STORAGE_CONNECTION_STRING`: Your Azure Storage account connection string
 
 4. Deploy the app to Azure Functions by running `func azure functionapp publish <function-app-name>`
 
@@ -27,6 +29,8 @@ This implementation is an improvement on the original version by @timilehinshodi
 Maya responds to text-based messages from users on Telegram. To initiate a conversation, add the [Telegram bot](https://t.me/Maya_assist_bot) and send a message containing "/start". You can ask Maya a variety of questions or give her prompts to generate images. For example, you can say "create an image of a mountain range" and Maya will use Dall-E to generate two images based on the prompt received and return them back to you.
 
 Maya stores chat history for each user in Cosmos DB, which allows it to have context for previous conversations with the user. This context helps Maya generate more accurate and relevant responses to the user's inquiries.
+
+To improve a document or resume, users can send their document to Maya through Telegram. Maya will edit the document using Azure Blob Services and respond with a link to the improved PDF file.
 
 Additionally, there are other commands you can use to interact with the chatbot such as /help to get help information or /clear to clear the chat history for the current chat session.
 
@@ -44,8 +48,8 @@ Maya is built with the following technologies:
 - OpenAI - An artificial intelligence research lab that offers a variety of natural language processing (NLP) and machine learning (ML) models.
 - Telegram - A messaging API that allows developers to interact with the Telegram platform and build chatbots.
 - Spotify API - Spotify music streaming API services.
+- Azure Blob Services - A cloud storage service provided by Microsoft for storing and retrieving large amounts of unstructured data.
 
 ## Conclusion
 
-Maya is an efficient chatbot that utilizes advanced NLP and ML model to generate accurate and relevant responses to user queries. It is hosted on Azure Functions, which enables optimal performance and scalability. With the ability to store chat history on Cosmos DB, Maya is able to provide context for previous conversations with users resulting in a more human-like experience for the end-user. The integration with Telegram bot API makes it even more accessible to users. The newly added functionality of creating Spotify playlists using OpenAI prompts and Spotify API makes her even more versatile and useful.
-
+Maya is an efficient chatbot that utilizes advanced NLP and ML model to generate accurate and relevant responses to user queries. It is hosted on Azure Functions, which enables optimal performance and scalability. With the ability to store chat history on Cosmos DB, Maya is able to provide context for previous conversations with users resulting in a more human-like experience for the end-user. The integration with Telegram bot API makes it even more accessible to users. The newly added functionality of document editing capabilities using Azure Blob Services makes her even more versatile and useful.
