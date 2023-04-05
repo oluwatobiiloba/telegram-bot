@@ -138,7 +138,7 @@ module.exports = async function (context, request, database, container, bot) {
 
             });
 
-            bot.sendMessage(body.message.chat.id, "I'm writing your resume!🤖🤖");
+            bot.sendMessage(body.message.chat.id, "I'm optimizing your document!🤖🤖");
 
             let resume = file_response.data.choices[0].message.content;
             resume = `${resume}`
@@ -183,7 +183,7 @@ module.exports = async function (context, request, database, container, bot) {
                 },
                 fileName: `${fileName}${fileId}${chatId}${fileExtension}`
             });
-            await bot.sendMessage(body.message.chat.id, `Here's your improved resume! : ${blockBlobClient.url}`);
+            await bot.sendMessage(body.message.chat.id, `Here's your improved document! : ${blockBlobClient.url}`);
             await bot.sendMessage(body.message.chat.id, `Hope it helps!`);
 
         } catch (error) {
