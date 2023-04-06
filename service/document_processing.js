@@ -32,7 +32,7 @@ module.exports = {
 
     async openai_prompt(context, text, bot, is_resume, chatId) {
         const prompts = {
-            resume: `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. Highlight. Ensure your response does not contain characters that cannot be encoded by common text encodings.
+            resume: `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience.  Ensure your response does not contain characters that cannot be encoded by common text encodings.
                      ${text}`,
             documents: `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.
                          ${text}`

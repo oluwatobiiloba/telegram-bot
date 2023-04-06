@@ -112,7 +112,7 @@ module.exports = async function (context, request, database, container, bot) {
                     context.log('Error getting response from OpenAi', err);
                     await bot.sendMessage(chatId, "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts 😿.");
                 });
-                await bot.sendMessage(chatId, 'Still working on it..., my creator is still working on making me faster 🤖. In the meantime,  take me as I am 🤗.');
+                await bot.sendMessage(chatId, 'Still working on it , my creator is still working on making me faster 🤖. In the meantime,  take me as I am 🤗.');
                 let songs = playlist_response.data.choices[0].message.content;
                 let spotify_query = null
                 context.log('Songs', songs);
