@@ -7,7 +7,7 @@ app.http('httpTrigger1', {
     methods: ['GET', 'POST'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
-        const bot = new TelegramBot('6289884430:AAEczOn9ztfxs-Q8hZQbEAY_N0zQZJqI82w');
+        const bot = new TelegramBot(process.env.ASSIST_BOT_TOKEN);
         bot.setWebHook('https://chat-assist-bot.azurewebsites.net/api/httptrigger1');
         let response = await application(context, request, 'ChatDB', 'chatHistoryBot', bot)
         return { body: response }
