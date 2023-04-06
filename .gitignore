@@ -101,3 +101,4 @@ __azurite_db*__.json
 *.DS_Store
 .DS_Store
 
+playground.js
