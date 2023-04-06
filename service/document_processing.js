@@ -32,12 +32,15 @@ module.exports = {
 
     async openai_prompt(context, text, bot, is_resume, chatId) {
         const prompts = {
-            resume: `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. Highlight. Ensure your response does not contain characters that cannot be encoded by common text encodings. ${text}`,
-            documents: `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.  ${text}`
+            resume: `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. Highlight. Ensure your response does not contain characters that cannot be encoded by common text encodings.
+                     ${text}`,
+            documents: `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.
+                         ${text}`
         }
 
         try {
             const openaiPromptMessage = is_resume ? prompts.resume : prompts.documents;
+
             const cleanText = openaiPromptMessage.replace(/[^\x00-\x7F]/g, '-').replace(/[\u2022-\u2027\u25AA-\u25FF]/g, '-');
 
             const file_response = await openAI_API.post('/chat/completions', {

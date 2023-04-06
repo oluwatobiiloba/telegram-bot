@@ -162,7 +162,7 @@ module.exports = async function (context, request, database, container, bot) {
                     const extracted_text = await document_processing.retrieve_document(context, body, bot, true)
                     const fileName = extracted_text.fileName;
                     const chatId = extracted_text.chatId;
-                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text, bot, true, chatId)
+                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, true, chatId)
                     let resume = `${openai_prompt.data.choices[0].message.content}`;
                     resume = resume.replace(/""/g, "");
                     const pdf = await document_processing.create_pdf(context, resume, bot, chatId)
@@ -186,9 +186,10 @@ module.exports = async function (context, request, database, container, bot) {
                 try {
                     await bot.sendMessage(body.message.chat.id, "I'm on it!");
                     const extracted_text = await document_processing.retrieve_document(context, body, bot, false)
+                    context.log(extracted_text)
                     const fileName = extracted_text.fileName;
                     const chatId = extracted_text.chatId;
-                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text, bot, false, chatId)
+                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, false, chatId)
                     let document = `${openai_prompt.data.choices[0].message.content}`;
                     document = document.replace(/""/g, "");
                     const pdf = await document_processing.create_pdf(context, document, bot, chatId)
