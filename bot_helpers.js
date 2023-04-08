@@ -16,6 +16,11 @@ module.exports = {
     
     If I don't respond, please send /clear to clear the chat history and start again. `,
 
-    document_upload: `PDF Document recieved, in order to process it kindly reply with ( /resume or /document ), the Unique ID below alongside context/requirements. Example - /resume BQACAgQAAxkBAAII42Qwo-M3VJT05i4w7l9OXEYhaBYYAAJJEQACxvJwUZHx4PepUZyfLwQ I want to apply for a junior designer role. Kindly help improve my resume to fit the typical job description of a junior designer and inlude a professional summary`
+    document_upload: `PDF Document recieved, in order to process it kindly reply with ( /resume or /document ), the Unique ID below alongside context/requirements. 
+    
+    Example - 
+    /resume <document_id> <what you want Maya to do>
+
+    /resume BQACAgQAAxkBAAII42Qwo-M3VJT05i4w7l9OXEYhaBYYAAJJEQACxvJwUZHx4PepUZyfLwQ I want to apply for a junior designer role. Kindly help improve my resume to fit the typical job description of a junior designer and include a professional summary`
 
 }
