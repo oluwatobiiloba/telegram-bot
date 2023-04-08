@@ -7,19 +7,21 @@ const openAI_API = axios.create({
 });
 const document_processing = require('./document_processing');
 const help_text = require('../bot_helpers');
-
+const bot_helpers = require('../bot_helpers');
+const regex = /[A-Za-z0-9_-]{22,}/;
 
 module.exports = async function (context, request, database, container, bot) {
 
     try {
         const body = await request.json();
         context.log('Request body', body);
-        const is_resume = body.message?.document && body.message?.document.mime_type === 'application/pdf' && body.message?.document?.file_name.toLowerCase().includes("resume")
-        const is_document = body.message?.document && body.message?.document.mime_type === 'application/pdf' && !body.message?.document?.file_name.toLowerCase().includes("resume")
+        // const is_resume = body.message?.document && body.message?.document.mime_type === 'application/pdf' && body.message?.document?.file_name.toLowerCase().includes("resume")
+        // const is_document = body.message?.document && body.message?.document.mime_type === 'application/pdf' && !body.message?.document?.file_name.toLowerCase().includes("resume")
 
         const { chat: { id: chatId } } = body.message;
+
         if (body.my_chat_member) {
-            bot.sendMessage(body.my_chat_member.chat.id, '🤖');
+            await bot.sendMessage(body.my_chat_member.chat.id, '🤖');
             context.log('User kicked me out of the group');
             return {
                 status: 200,
@@ -27,11 +29,24 @@ module.exports = async function (context, request, database, container, bot) {
             };
         } else if (body.message.video_note) {
             context.log('Video note received');
-            bot.sendMessage(body.message.chat.id, "I'm incapable of processing video notes.");
+            await bot.sendMessage(body.message.chat.id, "I'm incapable of processing video notes.");
             return {
                 status: 200,
                 body: "Video note received, but I'm incapable of processing video notes.",
             };
+        } else if (body.message?.document && body.message?.document.mime_type === 'application/pdf') {
+            const fileId = body.message.document.file_id;
+            const file_name = body.message?.document?.file_name
+            let document = body.message?.document
+            document.chatId = chatId
+
+            await cosmo_surfer.uploadDocument(document, 'ChatDB', 'fileContainer', context)
+            await bot.sendMessage(chatId, bot_helpers.document_upload)
+            await bot.sendMessage(chatId, fileId)
+            return {
+                status: 200,
+                body: "Document Received",
+            }
         }
         //retrieve chat history
         let messages = await cosmo_surfer.getChatHistory(chatId, database, container);
@@ -39,6 +54,9 @@ module.exports = async function (context, request, database, container, bot) {
         messages.push({ role: 'user', content: body.message.text });
         //retrieve prompt for non-conversation messages
         const prompt_req = body.message?.text?.toLowerCase() || "null";
+        const prompt_req_doc = body.message?.text || null
+        const contains_id = prompt_req_doc?.match(regex) ? true : false
+
 
 
         switch (true) {
@@ -154,20 +172,32 @@ module.exports = async function (context, request, database, container, bot) {
                         message: 'No songs recommended.',
                     }
                 };
-            case is_resume:
-                context.log('Resume received');
+            case prompt_req.includes('/resume') && contains_id:
 
                 try {
+                    const fileIds = prompt_req_doc.match(regex);
+                    const uniqueId = fileIds[0] || prompt_req_doc.split(" ")[1]
+
+                    if (!uniqueId) {
+                        await bot.sendMessage(chatId, "Document ID not provided or in wrong format, please check and retry. Ypu can refer to \help ")
+                        return {
+                            status: 400,
+                            body: "Invalid document id provided.",
+                        }
+                    }
+                    const prompt = prompt_req.replace(uniqueId.toLowerCase(), '').replace("\\", '').replace('/resume', '')
+                    const file = await cosmo_surfer.findDocument(uniqueId, 'ChatDB', 'fileContainer', context)
+
                     await bot.sendMessage(body.message.chat.id, "I'm on it!");
-                    const extracted_text = await document_processing.retrieve_document(context, body, bot, true)
+                    const extracted_text = await document_processing.retrieve_document(context, body, bot, true, uniqueId, file.document)
                     const fileName = extracted_text.fileName;
                     const chatId = extracted_text.chatId;
-                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, true, chatId)
+                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, true, chatId, prompt)
                     let resume = `${openai_prompt.data.choices[0].message.content}`;
                     resume = resume.replace(/""/g, "");
                     const pdf = await document_processing.create_pdf(context, resume, bot, chatId)
                     const upload_to_blob = await document_processing.upload_to_blob(context, pdf, fileName, bot, chatId)
-                    await bot.sendMessage(chatId, `Here's your improved resume! : ${upload_to_blob}`);
+                    await bot.sendMessage(chatId, `Here's your request! : ${upload_to_blob}`);
                     await bot.sendMessage(chatId, `Hope it helps!`);
                     return {
                         status: 200,
@@ -180,21 +210,33 @@ module.exports = async function (context, request, database, container, bot) {
                         body: `Document received, but An internal error occurred while processing the request. ${error}`,
                     };
                 }
-            case is_document:
+            case prompt_req.includes('/document') && contains_id:
                 context.log('Document received');
 
                 try {
+                    const fileIds = prompt_req_doc.match(regex);
+                    const uniqueId = fileIds[0] || prompt_req_doc.split(" ")[1]
+
+                    if (!uniqueId) {
+                        await bot.sendMessage(chatId, "Document ID not provided or in wrong format, please check and retry. Ypu can refer to \help ")
+                        return {
+                            status: 400,
+                            body: "Invalid document id provided.",
+                        }
+                    }
+                    const prompt = prompt_req.replace(uniqueId.toLowerCase(), '').replace("\\", '').replace('/document', '')
+                    const file = await cosmo_surfer.findDocument(uniqueId, 'ChatDB', 'fileContainer', context)
+
                     await bot.sendMessage(body.message.chat.id, "I'm on it!");
-                    const extracted_text = await document_processing.retrieve_document(context, body, bot, false)
-                    context.log(extracted_text)
+                    const extracted_text = await document_processing.retrieve_document(context, body, bot, false, uniqueId, file.document)
                     const fileName = extracted_text.fileName;
                     const chatId = extracted_text.chatId;
-                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, false, chatId)
+                    const openai_prompt = await document_processing.openai_prompt(context, extracted_text.text_input, bot, false, chatId, prompt)
                     let document = `${openai_prompt.data.choices[0].message.content}`;
                     document = document.replace(/""/g, "");
                     const pdf = await document_processing.create_pdf(context, document, bot, chatId)
                     const upload_to_blob = await document_processing.upload_to_blob(context, pdf, fileName, bot, chatId)
-                    await bot.sendMessage(chatId, `Here's your improved document! : ${upload_to_blob}`);
+                    await bot.sendMessage(chatId, `Here's your  document! : ${upload_to_blob}`);
                     await bot.sendMessage(chatId, `Hope it helps!`);
                     return {
                         status: 200,
@@ -242,7 +284,7 @@ module.exports = async function (context, request, database, container, bot) {
                 };
         }
     } catch (error) {
-        context.log(`Error when processing request: ${error}`);
+        context.error(`Error when processing request: ${error}`);
         if (error.response) {
             context.log(error.response.status);
             context.log(error.response.data);

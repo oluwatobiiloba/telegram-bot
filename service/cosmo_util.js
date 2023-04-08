@@ -2,7 +2,7 @@
 const { CosmosClient } = require('@azure/cosmos');
 
 // Extract endpoint and key values from the environment variables
-const { endpoint, key, database, container } = {
+const { endpoint, key } = {
     endpoint: process.env.COSMO_ENDPOINT,
     key: process.env.COSMO_KEY
 };
@@ -95,19 +95,33 @@ module.exports = {
     },
 
     // A function to upload documents to the database
-    async uploadDocument(document, database, container) {
+    async uploadDocument(document, database, container, context) {
         try {
+
             await client.database(database).container(container).items.create({
-                id: document.id,
-                partitionKey: document.id,
+                id: document.file_id,
+                partitionKey: document.file_id,
                 document: document,
                 chatId: document.chatId
             });
-
+            return document
         } catch (error) {
-            console.log(error);
+            context.log(error);
+            throw error
         }
-        return document;
+
+    },
+
+    async findDocument(id, database, container, context) {
+        try {
+            const { resource } = await client.database(database).container(container).item(id, id).read()
+            if (!resource) {
+                return null
+            }
+            return resource
+        } catch (err) {
+            context.log(err)
+        }
     }
 
 }

@@ -10,16 +10,17 @@ const openAI_API = axios.create({
 const { jsPDF } = require('jspdf');
 
 module.exports = {
-    async retrieve_document(context, body, bot, is_resume) {
+    async retrieve_document(context, body, bot, is_resume, uniqueId, file) {
         try {
+            context.log(uniqueId)
             const chatId = body.message.chat.id;
-            const fileId = body.message.document.file_id;
-            const fileName = body.message.document.file_name;
+            const fileId = uniqueId || file.id;
 
 
-            const fileUrl = await bot.getFileLink(fileId);
+            const fileUrl = await bot.getFileLink(fileId.trim());
             const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
 
+            const fileName = body.message?.document?.file_name || `${file.file_name}_${Date.now()}`;
             const text = await pdfParse(fileResponse.data);
             let text_input = text.text
 
@@ -30,13 +31,15 @@ module.exports = {
         }
     },
 
-    async openai_prompt(context, text, bot, is_resume, chatId) {
+    async openai_prompt(context, text, bot, is_resume, chatId, prompt) {
         const prompts = {
-            resume: `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience.  Ensure your response does not contain characters that cannot be encoded by common text encodings.
+            resume: `${prompt ? prompt : `Improve the resume below. Add a professional summary that emphasizes the skills relevant to the educational background, role, and experience. `} Ensure your response does not contain characters that cannot be encoded by common text encodings.
                      ${text}`,
-            documents: `Improve the writeup below. Ensure your response does not contain characters that cannot be encoded by common text encodings.
+            documents: `${prompt ? prompt : `Improve the writeup below `}. Ensure your response does not contain characters that cannot be encoded by common text encodings.
                          ${text}`
         }
+
+
 
         try {
             const openaiPromptMessage = is_resume ? prompts.resume : prompts.documents;
@@ -48,7 +51,7 @@ module.exports = {
                 messages: [{ role: 'user', content: cleanText }],
             });
 
-            await bot.sendMessage(chatId, `I'm writing your ${is_resume ? "resume" : "document"}!🤖🤖`);
+            await bot.sendMessage(chatId, `I'm almost done!🤖🤖`);
             return file_response
         } catch (error) {
             context.error(error);
@@ -85,7 +88,7 @@ module.exports = {
             }
 
             const modifiedPdfBytes = doc.output('arraybuffer')
-            await bot.sendMessage(chatId, "Almost done!🤖🤖");
+            await bot.sendMessage(chatId, "Almost done!, for real this time. 🤖🤖");
             return modifiedPdfBytes
         } catch (error) {
             context.error(error);
