@@ -2,6 +2,7 @@ require('dotenv').config();
 const { app } = require('@azure/functions');
 const application = require('../../service/app2')
 const TelegramBot = require('node-telegram-bot-api');
+const regex = /[A-Za-z0-9_-]{22,}/;
 const { Queue } = require('bullmq');
 const queue = new Queue('chatbox', {
     connection: {
@@ -21,13 +22,17 @@ app.http('chatbox', {
             drop_pending_updates: true
         });
         const body = await request.json();
-        if (body.message.text === '/bull') {
-            await queue.add('chatbox', { text: 'Hello from bullmq' });
+        const prompt_req_doc = body.message?.text || null
+        const contains_id = prompt_req_doc?.match(regex) ? true : false
+
+        if (contains_id) {
+            await queue.add('chatbox', { body, context, bot }, { attempts: 2, backoff: 1000 });
             return {
                 body: 'Job added to queue'
 
             }
         }
+
         let response = await application(context, body, 'ChatDB', 'chatHistory', bot)
         return { response }
     }
