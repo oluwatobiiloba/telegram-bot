@@ -189,7 +189,6 @@ module.exports = async function (context, body, database, container, bot) {
 
                     const file = await cosmo_surfer.findDocument(uniqueId, 'ChatDB', 'fileContainer', context)
 
-                    await bot.sendMessage(body.message.chat.id, "I'm on it!");
                     const extracted_text = await document_processing.retrieve_document(context, body, bot, true, uniqueId, file.document)
                     const fileName = extracted_text.fileName;
                     const chatId = extracted_text.chatId;
