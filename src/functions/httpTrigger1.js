@@ -3,6 +3,13 @@ const application = require('../../service/app2')
 const TelegramBot = require('node-telegram-bot-api');
 const regex = /[A-Za-z0-9_-]{22,}/;
 const { Queue } = require('bullmq');
+const queue = new Queue('chatbox', {
+    connection: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD
+    }
+});
 
 app.http('httpTrigger1', {
     methods: ['GET', 'POST'],
