@@ -1,34 +1,27 @@
 require('dotenv').config();
-let appInsights = require('applicationinsights');
-appInsights
-    .setup(process.env.APPINSIGHTS_CONNECTIONSTRING)
-    .setSendLiveMetrics(true)
-    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI)
-    .start();
+const appInsights = require('applicationinsights');
+appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
+
 const { Worker } = require('bullmq');
 const application = require('../../service/worker_app')
 const { Telegraf } = require('telegraf');
 
+const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } = process.env;
 
-
-let result = null;
 const worker = new Worker('chatbox', async (job) => {
     const { body, context, bot } = job.data;
     const res_bot = new Telegraf(bot.token);
 
-    let response = await application(console, body, 'ChatDB', 'chatHistoryBot', res_bot.telegram)
+    const response = await application(console, body, 'ChatDB', 'chatHistoryBot', res_bot.telegram)
 
     console.log('Job completed', response);
-    result = response;
     return response;
 
-
-    // Do your job processing here
 }, {
     connection: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_PASSWORD
+        host: REDIS_HOST,
+        port: REDIS_PORT,
+        password: REDIS_PASSWORD
     },
     concurrency: 5,
 });
@@ -39,7 +32,7 @@ worker.on('completed', (job) => {
         name: "Job completed",
         properties: {
             jobId: job.id,
-            result: result,
+            result: job.returnvalue,
         },
     });
 });
