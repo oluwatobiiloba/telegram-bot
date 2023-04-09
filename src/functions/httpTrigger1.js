@@ -1,7 +1,15 @@
 const { app } = require('@azure/functions');
 const application = require('../../service/app2')
 const TelegramBot = require('node-telegram-bot-api');
-
+const regex = /[A-Za-z0-9_-]{22,}/;
+const { Queue } = require('bullmq');
+const queue = new Queue('chatbox', {
+    connection: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASSWORD
+    }
+});
 
 app.http('httpTrigger1', {
     methods: ['GET', 'POST'],
@@ -9,7 +17,21 @@ app.http('httpTrigger1', {
     handler: async (request, context) => {
         const bot = new TelegramBot(process.env.ASSIST_BOT_TOKEN);
         bot.setWebHook('https://chat-assist-bot.azurewebsites.net/api/httptrigger1');
-        let response = await application(context, request, 'ChatDB', 'chatHistoryBot', bot)
+        const body = await request.json();
+
+
+        const prompt_req_doc = body.message?.text || null
+        const contains_id = prompt_req_doc?.match(regex) ? true : false
+
+        if (contains_id) {
+            await queue.add('chatbox', { body, context, bot });
+            return {
+                body: 'Job added to queue'
+
+            }
+        }
+
+        let response = await application(context, body, 'ChatDB', 'chatHistoryBot', bot)
         return { body: response }
     }
 });

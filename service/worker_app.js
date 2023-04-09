@@ -186,6 +186,7 @@ module.exports = async function (context, body, database, container, bot) {
                         }
                     }
                     const prompt = prompt_req.replace(uniqueId.toLowerCase(), '').replace("\\", '').replace('/resume', '')
+
                     const file = await cosmo_surfer.findDocument(uniqueId, 'ChatDB', 'fileContainer', context)
 
                     await bot.sendMessage(body.message.chat.id, "I'm on it!");
@@ -204,7 +205,7 @@ module.exports = async function (context, body, database, container, bot) {
                         body: "Resume received, and processed.",
                     };
                 } catch (error) {
-                    context.error("Error occurred:", error);
+                    context.log("Error occurred:", error);
                     return {
                         status: 500,
                         body: `Document received, but An internal error occurred while processing the request. ${error}`,
@@ -243,7 +244,7 @@ module.exports = async function (context, body, database, container, bot) {
                         body: "Resume received, and processed.",
                     };
                 } catch (error) {
-                    context.error("Error occurred:", error);
+                    context.log("Error occurred:", error);
                     return {
                         status: 500,
                         body: `Document received, but An internal error occurred while processing the request. ${error}`,
@@ -284,8 +285,8 @@ module.exports = async function (context, body, database, container, bot) {
                 };
         }
     } catch (error) {
-        console.log(error);
-        context.error(`Error when processing request: ${error}`);
+        context.log(error);
+        context.log(`Error when processing request: ${error}`);
         if (error.response) {
             context.log(error.response.status);
             context.log(error.response.data);
