@@ -9,7 +9,9 @@ app.http('chatbox', {
     authLevel: 'anonymous',
     handler: async (request, context) => {
         const bot = new TelegramBot(process.env.BOT_TOKEN);
-        bot.setWebHook(process.env.BOT_WEBHOOK);
+        bot.setWebHook(process.env.BOT_WEBHOOK, {
+            drop_pending_updates: true
+        });
 
         let response = await application(context, request, 'ChatDB', 'chatHistory', bot)
         return { response }
