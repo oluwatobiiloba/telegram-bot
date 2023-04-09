@@ -12,7 +12,7 @@ const { jsPDF } = require('jspdf');
 module.exports = {
     async retrieve_document(context, body, bot, is_resume, uniqueId, file) {
         try {
-            context.log(uniqueId)
+
             const chatId = body.message.chat.id;
             const fileId = uniqueId || file.id;
 
@@ -97,7 +97,9 @@ module.exports = {
 
     async upload_to_blob(context, modifiedPdfBytes, fileName, bot, chatId) {
         try {
-            const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
+
+
+            const blobServiceClient = BlobServiceClient?.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING) 
             const containerName = 'pdf';
             const containerClient = blobServiceClient.getContainerClient(containerName);
             const blobName = fileName;
