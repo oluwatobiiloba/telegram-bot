@@ -26,7 +26,8 @@ app.http('chatbox', {
         const contains_id = prompt_req_doc?.match(regex) ? true : false
 
         if (contains_id) {
-            await queue.add('chatbox', { body, context, bot }, { attempts: 2, backoff: 1000 });
+            const job = await queue.add('chatbox', { body, context, bot }, { attempts: 2, backoff: 1000 });
+            await bot.sendMessage(body.message.chat.id, `I'll get back to you shortly, I've got workers working on your request. Here's your ticket ID: ${job.id}`)
             return {
                 body: 'Job added to queue'
 

@@ -29,7 +29,8 @@ const worker = new Worker('chatbox', async (job) => {
         host: process.env.REDIS_HOST,
         port: process.env.REDIS_PORT,
         password: process.env.REDIS_PASSWORD
-    }
+    },
+    concurrency: 5,
 });
 
 worker.on('completed', (job) => {
