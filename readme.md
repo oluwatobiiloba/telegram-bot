@@ -1,4 +1,4 @@
-# Maya - An AI Chatbot with Telegram Integration and Document Editing Capabilities using bullmq
+# Maya - An AI Chatbot with Telegram Integration and Document Editing Capabilities.
 
 Maya is an intelligent chatbot that integrates with OpenAI's GPT-3, Dall-E, and 3.5-turbo models to generate human-like responses and images to user queries. The app is hosted on Azure Functions and stores chat history on Cosmos DB.
 
