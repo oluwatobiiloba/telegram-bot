@@ -16,7 +16,7 @@ app.http('httpTrigger1', {
     authLevel: 'anonymous',
     handler: async (request, context) => {
         const bot = new TelegramBot(process.env.ASSIST_BOT_TOKEN);
-        bot.setWebHook('https://chat-assist-bot.azurewebsites.net/api/httptrigger1');
+        bot.setWebHook('https://maya-assist-bot.azurewebsites.net/api/httptrigger1');
         const body = await request.json();
         const prompt_req_doc = body.message?.text || null
         const contains_id = prompt_req_doc?.match(regex) ? true : false
