@@ -7,11 +7,11 @@ const state = crypto.randomBytes(20).toString('hex');
 
 const app = express();
 const PORT = 8888;
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const CLIENT_ID = process.env.CLIENT_ID || '482a639505514022863440361d2abaac';
+const CLIENT_SECRET = process.env.CLIENT_SECRET || '604af0e299af411cbdc797c8d94dcdd7';
 const REDIRECT_URI = 'http://localhost:8888/callback';
 const STATE = state;
-const SCOPES = 'playlist-modify-public playlist-modify-private';
+const SCOPES = 'playlist-modify-public playlist-modify-private ugc-image-upload playlist-read-collaborative ';
 
 // Step 1: Redirect the user to the Spotify authorization page
 app.get('/login', (req, res) => {

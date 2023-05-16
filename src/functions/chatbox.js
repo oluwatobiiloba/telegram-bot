@@ -25,13 +25,13 @@ app.http('chatbox', {
         const body = await request.json();
         const prompt_req_doc = body.message?.text || null
         const contains_id = prompt_req_doc?.match(regex) ? true : false
+        const contains_apple_playlist_url = body.message.text.includes("https://music.apple.com/ng/playlist/") ? true : false
 
-        if (contains_id) {
+        if (contains_id && !contains_apple_playlist_url) {
             const job = await queue.add('chatbox', { body, context, bot }, { attempts: 2, backoff: 1000 });
             await bot.sendMessage(body.message.chat.id, `I'll get back to you shortly, I've got workers working on your request. Here's your ticket ID: ${job.id}`)
             return {
                 body: 'Job added to queue'
-
             }
         }
 

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const qs = require('qs');
+const { JSDOM } = require('jsdom');
 
 const refreshAccessToken = (refreshToken) => {
     const authOptions = {
@@ -61,14 +62,15 @@ const addSongsToPlaylist = async (
     username,
     spotify_IDs,
     access_token,
-    context
+    context,
+    playlist_info
 ) => {
     try {
         const playlist = await axios.post(
             `https://api.spotify.com/v1/users/${spotify_user_id}/playlists`,
             {
-                name: `${username}'s Playlist by Maya`,
-                description: "Playlist created by Chat Assist Bot",
+                name: playlist_info ? `${playlist_info.name} (converted by Maya)` : `${username}'s Playlist by Maya`,
+                description: playlist_info ? `Playlist by ${playlist_info.author}` : "Playlist created by Chat Assist Bot",
                 public: true
             },
             {
@@ -91,6 +93,24 @@ const addSongsToPlaylist = async (
                 }
             }
         );
+
+        if (playlist_info.image) {
+
+            const image_data = await axios.get(playlist_info.image, {
+                responseType: 'arraybuffer'
+            });
+            const image = Buffer.from(image_data.data, 'binary').toString('base64');
+        
+            await axios.put(
+                `https://api.spotify.com/v1/playlists/${playlist_id}/images`,
+                image,
+                {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`
+                    }
+                }
+            );
+        }
         return playlist_url;
     } catch (error) {
         context.error(`Failed to add songs to playlist: ${error}`);
@@ -98,4 +118,57 @@ const addSongsToPlaylist = async (
     }
 };
 
-module.exports = { refreshAccessToken, searchSongs, addSongsToPlaylist };
+const convertAppleMusicPlaylist = async (playlist_url, context) => {
+    try {
+        const playlist_html = await axios.get(playlist_url);
+        const html = playlist_html.data;
+        const dom = new JSDOM(html);
+        const document = dom.window.document;
+        const scriptTag = document.querySelector("script[id='schema:music-playlist']");
+        const imageTag = document.querySelector("meta[property='og:image']");
+        const image = imageTag?.getAttribute("content");
+        const jsonContent = scriptTag.textContent;
+        const playlist = JSON.parse(jsonContent);
+        const track_info = playlist.track.map(async (track) => { 
+            if (track.url === undefined) {
+                return null;
+            }
+
+            const { data } = await axios.get(track.url);
+            const track_dom = new JSDOM(data);
+            const track_document = track_dom.window.document;
+            const track_scriptTag = track_document.querySelector("meta[property='music:musician']");
+            const album_scriptTag = track_document.querySelector("meta[property='og:url']");
+            const track_tag_content = track_scriptTag?.getAttribute("content");
+            const album_tag_content = album_scriptTag?.getAttribute("content");
+            const artist = track_tag_content?.split("/").slice(-2, -1)[0];
+            const album = album_tag_content?.split("/").slice(-2, -1)[0];
+
+            if ( artist || album ) {
+                return {
+                    name: track.name,
+                    artist: artist,
+                    album: album
+              }
+          } else {
+             // context.log(`Cannot find ID for ${song.name}`);
+              return null;
+          }
+        });
+        const playlist_object = {
+            name: playlist.name,
+            description: playlist.description,
+            author: playlist.author.name,
+            image: image,
+            tracks: await Promise.all(track_info)
+        }
+        return playlist_object;
+    } catch (error) {
+        context.error(`Failed to convert Apple Music playlist: ${error}`);
+        throw error; // rethrow the error so it can be caught higher up
+    }
+}
+
+
+
+module.exports = { refreshAccessToken, searchSongs, addSongsToPlaylist,convertAppleMusicPlaylist };

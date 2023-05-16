@@ -9,6 +9,7 @@ const document_processing = require('./document_processing');
 const help_text = require('../bot_helpers');
 const bot_helpers = require('../bot_helpers');
 const regex = /[A-Za-z0-9_-]{22,}/;
+const apple_music_regex = /https:\/\/music\.apple\.com\/([a-z]{2})\/playlist\/([a-zA-Z0-9_-]+)\/pl\.u-([a-zA-Z0-9]+)/g
 
 module.exports = async function (context, body, database, container, bot) {
 
@@ -56,8 +57,8 @@ module.exports = async function (context, body, database, container, bot) {
         const prompt_req = body.message?.text?.toLowerCase() || "null";
         const prompt_req_doc = body.message?.text || null
         const contains_id = prompt_req_doc?.match(regex) ? true : false
-
-
+        const contains_apple_playlist_url = body.message.text.includes("https://music.apple.com/ng/playlist/") ? true : false
+        const url = contains_apple_playlist_url ? body.message.text : null
 
         switch (true) {
             case prompt_req === '/clear':
@@ -88,6 +89,43 @@ module.exports = async function (context, body, database, container, bot) {
                 return {
                     status: 200,
                     message: 'Help message sent',
+                };
+            case contains_apple_playlist_url:
+                //convert playlist
+                await bot.sendMessage(chatId, "I'm working on it, please give me a minute or two 🤖.");
+                const converted_playlist = await spotify_helper.convertAppleMusicPlaylist(url, context);
+                await bot.sendMessage(chatId, 'Still working on it , my creator is still working on making me faster 🤖. In the meantime, take me as I am 🤗.');
+                const retrieve_access_token = await spotify_helper.refreshAccessToken(process.env.REFRESH_TOKEN);
+                const retrieve_spotify_IDs = await spotify_helper.searchSongs(converted_playlist.tracks, retrieve_access_token, context)
+                await bot.sendMessage(chatId, 'Almost done..., I promise 🤞.');
+
+                if (retrieve_spotify_IDs) {
+                    const spotify_user_id = process.env.SPOTIFY_USER_ID;
+                    const username = body.message?.from?.first_name;
+                    const add_track = await spotify_helper.addSongsToPlaylist(
+                        spotify_user_id,
+                        username,
+                        retrieve_spotify_IDs,
+                        retrieve_access_token,
+                        context,
+                        converted_playlist
+                    ).catch(async (err) => {
+                        context.log('Error creating Playlist', err);
+                        await bot.sendMessage(chatId, "I'm sorry, I was 👌🏻 close to creating your playlist 😢. Please try again in a minute while I gather my thoughts.");
+                    });;
+                    await bot.sendMessage(chatId, `Here's your converted playlist 🤖, as promised : ${add_track}.`);
+                    await bot.sendMessage(chatId, ' If you do not have a Spotify account, you can visit https://soundiiz.com/ to convert the playlist to other preferred music service.');
+                    return {
+                        status: 200,
+                        message: 'Playlist created',
+                        playlist: add_track,
+                    };
+                } else {
+                    await bot.sendMessage(chatId, "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts.");
+                    return {
+                        status: 200,
+                        message: 'No songs recommended.',
+                    }
                 };
             case prompt_req.includes('create an image'):
                 //create image prompt
@@ -133,7 +171,6 @@ module.exports = async function (context, body, database, container, bot) {
                 await bot.sendMessage(chatId, 'Still working on it , my creator is still working on making me faster 🤖. In the meantime,  take me as I am 🤗.');
                 let songs = playlist_response.data.choices[0].message.content;
                 let spotify_query = null
-                context.log('Songs', songs);
                 try {
                     spotify_query = JSON.parse(songs.substring(songs.indexOf('['), songs.lastIndexOf(']') + 1))
                 } catch (error) {
