@@ -31,11 +31,11 @@ const refreshAccessToken = (refreshToken) => {
 };
 
 const searchSongs = async (songs, access_token, context) => {
+    
     try {
         const songPromises = songs.map(async (song) => {
-            const searchQuery = encodeURIComponent(`${song.name} ${song.artist} ${song.album}`);
+            const searchQuery = encodeURIComponent(`track:${song.name} artist:${song.artist} album:${song.album}`);
             const searchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=track`;
-
             const { data } = await axios.get(searchUrl, {
                 headers: { Authorization: `Bearer ${access_token}` },
                 params: { limit: 1 }
@@ -96,20 +96,24 @@ const addSongsToPlaylist = async (
 
         if (playlist_info.image) {
 
-            const image_data = await axios.get(playlist_info.image, {
-                responseType: 'arraybuffer'
-            });
-            const image = Buffer.from(image_data.data, 'binary').toString('base64');
-        
-            await axios.put(
-                `https://api.spotify.com/v1/playlists/${playlist_id}/images`,
-                image,
-                {
-                    headers: {
-                        Authorization: `Bearer ${access_token}`
+            try {
+                const image_data = await axios.get(playlist_info.image, {
+                    responseType: 'arraybuffer'
+                });
+                const image = Buffer.from(image_data.data, 'binary').toString('base64');
+            
+                await axios.put(
+                    `https://api.spotify.com/v1/playlists/${playlist_id}/images`,
+                    image,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${access_token}`
+                        }
                     }
+                );
+                } catch (error) {
+                    context.error(`Failed to add image to playlist: ${error}`);
                 }
-            );
         }
         return playlist_url;
     } catch (error) {
@@ -169,6 +173,12 @@ const convertAppleMusicPlaylist = async (playlist_url, context) => {
     }
 }
 
+//  async function run(url) {
+//     const playlist = await searchSongs(url);
+//     console.log(playlist);
+// }
+
+// run([{ name: 'Daylight', artist: 'joji', album: 'nectar' }])
 
 
 module.exports = { refreshAccessToken, searchSongs, addSongsToPlaylist,convertAppleMusicPlaylist };
