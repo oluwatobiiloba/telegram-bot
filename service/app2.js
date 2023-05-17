@@ -9,7 +9,6 @@ const document_processing = require('./document_processing');
 const help_text = require('../bot_helpers');
 const bot_helpers = require('../bot_helpers');
 const regex = /[A-Za-z0-9_-]{22,}/;
-const apple_music_regex = /https:\/\/music\.apple\.com\/([a-z]{2})\/playlist\/([a-zA-Z0-9_-]+)\/pl\.u-([a-zA-Z0-9]+)/g
 
 module.exports = async function (context, body, database, container, bot) {
 
@@ -170,12 +169,18 @@ module.exports = async function (context, body, database, container, bot) {
                 });
                 await bot.sendMessage(chatId, 'Still working on it , my creator is still working on making me faster 🤖. In the meantime,  take me as I am 🤗.');
                 let songs = playlist_response.data.choices[0].message.content;
+                context.log('Songs', songs);
                 let spotify_query = null
                 try {
                     spotify_query = JSON.parse(songs.substring(songs.indexOf('['), songs.lastIndexOf(']') + 1))
                 } catch (error) {
                     context.log('Error parsing Songs', error);
                     await bot.sendMessage(chatId, "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts.");
+                    return {
+                        status: 500,
+                        message: error,
+                        
+                    };
                 }
 
                 const spotify_access_token = await spotify_helper.refreshAccessToken(process.env.REFRESH_TOKEN);
@@ -190,10 +195,14 @@ module.exports = async function (context, body, database, container, bot) {
                         username,
                         spotify_IDs,
                         spotify_access_token,
-                        context,
+                        context
                     ).catch(async (err) => {
                         context.log('Error creating Playlist', err);
                         await bot.sendMessage(chatId, "I'm sorry, I was 👌🏻 close to creating your playlist 😢. Please try again in a minute while I gather my thoughts.");
+                        return {
+                            status: 500,
+                            message: err
+                        };
                     });;
                     await bot.sendMessage(chatId, `Here's your playlist 🤖, as promised : ${add_track}.`);
                     await bot.sendMessage(chatId, ' If you do not have a Spotify account, you can visit https://soundiiz.com/ to convert the playlist to your preferred music service.');
@@ -205,7 +214,7 @@ module.exports = async function (context, body, database, container, bot) {
                 } else {
                     await bot.sendMessage(chatId, "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts.");
                     return {
-                        status: 200,
+                        status: 500,
                         message: 'No songs recommended.',
                     }
                 };
