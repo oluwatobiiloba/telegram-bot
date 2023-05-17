@@ -34,7 +34,7 @@ const searchSongs = async (songs, access_token, context) => {
     
     try {
         const songPromises = songs.map(async (song) => {
-            const searchQuery = encodeURIComponent(`track:${song.name} artist:${song.artist} album:${song.album}`);
+            const searchQuery = encodeURIComponent(`${song.name} ${song.artist} ${song.album}`);
             const searchUrl = `https://api.spotify.com/v1/search?q=${searchQuery}&type=track`;
             const { data } = await axios.get(searchUrl, {
                 headers: { Authorization: `Bearer ${access_token}` },
