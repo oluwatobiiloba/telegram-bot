@@ -13,11 +13,7 @@ const regex = /[A-Za-z0-9_-]{22,}/;
 module.exports = async function (context, body, database, container, bot) {
 
     try {
-
         context.log('Request body', body);
-        // const is_resume = body.message?.document && body.message?.document.mime_type === 'application/pdf' && body.message?.document?.file_name.toLowerCase().includes("resume")
-        // const is_document = body.message?.document && body.message?.document.mime_type === 'application/pdf' && !body.message?.document?.file_name.toLowerCase().includes("resume")
-
         const { chat: { id: chatId } } = body.message;
 
         if (body.my_chat_member) {
@@ -36,7 +32,6 @@ module.exports = async function (context, body, database, container, bot) {
             };
         } else if (body.message?.document && body.message?.document.mime_type === 'application/pdf') {
             const fileId = body.message.document.file_id;
-            const file_name = body.message?.document?.file_name
             let document = body.message?.document
             document.chatId = chatId
 
@@ -253,7 +248,7 @@ module.exports = async function (context, body, database, container, bot) {
                     context.error("Error occurred:", error);
                     return {
                         status: 500,
-                        body: `Document received, but An internal error occurred while processing the request. ${error}`,
+                        body: `Resume received, but An internal error occurred while processing the request. ${error}`,
                     };
                 }
             case prompt_req.includes('/document') && contains_id:
