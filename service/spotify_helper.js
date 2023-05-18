@@ -94,7 +94,7 @@ const addSongsToPlaylist = async (
             }
         );
 
-        if (playlist_info.image) {
+        if (playlist_info?.image) {
 
             try {
                 const image_data = await axios.get(playlist_info.image, {
