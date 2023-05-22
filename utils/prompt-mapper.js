@@ -8,7 +8,7 @@ const requestHandlerMapper = {
 module.exports = (prompt) => {
   let handler = 'default';
 
-  if (APPLE_REGEX.test(prompt)) {
+  if (APPLE_REGEX.test(prompt.substring(0, 50))) {
     handler = 'convert-apple-playlist';
   } else {
     for (let key of Object.keys(requestHandlerMapper)) {

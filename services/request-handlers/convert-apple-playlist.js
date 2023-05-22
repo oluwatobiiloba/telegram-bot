@@ -2,23 +2,33 @@ const playlistConverter = require('../../daos/playlist-converter');
 const musicDao = require('../../daos/spotify');
 const { staticBotMsgs, logMsgs } = require('../../messages');
 const { APPLE_REGEX } = require('../../utils/constants');
-const { JSDOM } = require('jsdom');
+const TimeLogger = require('../../utils/timelogger');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
-  const appleUrl = prompt.match(APPLE_REGEX)[0];
+  const appleUrl = prompt.substring(0, 70).match(APPLE_REGEX)[0];
+
+  const timeLogger = new TimeLogger(`CONVERT-APPLE-PLAYLIST-DURATION-${Date.now()}`);
 
   try {
     let funcResponse;
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
 
+    timeLogger.start('getting-playlist-content');
+
     const { playlistContent, image, tracks } = await playlistConverter.appleToSpotify(appleUrl);
+
+    timeLogger.end('getting-playlist-content');
 
     if (!tracks) throw new Error(logMsgs.NO_PLAYLIST_TRACK_INFO);
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[1]);
 
+    timeLogger.start('getting-access-token');
+
     const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
+
+    timeLogger.end('getting-access-token');
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
@@ -36,8 +46,11 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
         image,
         user,
       };
+      timeLogger.start('creating-playlist');
 
       const playlistURL = await musicDao.createPlaylist(tracks, accessToken, config);
+
+      timeLogger.end('creating-playlist');
 
       await bot.sendMessage(
         chatId,
@@ -55,7 +68,9 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
   } catch (err) {
     await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
 
-    err.message = `CONV-PLAYLIST-REQ-HANDLER: ${err.message}`;
+    err.message = `CONVERT-PLAYLIST-REQ-HANDLER: ${err.message}`;
     throw err;
+  } finally {
+    timeLogger.log();
   }
 };

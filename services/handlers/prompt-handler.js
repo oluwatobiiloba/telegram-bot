@@ -3,10 +3,20 @@ const chatDao = require('../../daos/chat-history');
 const { staticBotMsgs, logMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
 const promptMapper = require('../../utils/prompt-mapper');
+const TimeLogger = require('../../utils/timelogger');
+const logger = require('../../utils/logger');
 
-module.exports = async function (context, body, bot) {
+module.exports = async function (body, bot) {
+  const timeLogger = new TimeLogger(`PROMPT-HANDLER-DURATION-${Date.now()}`);
+
+  const LOG_KEY = `PROMPT-HANDLER-${Date.now()}`;
+
   try {
-    const mediaResponse = await mediaHandler(context, body, bot);
+    timeLogger.start('media-handler');
+
+    const mediaResponse = await mediaHandler(body, bot);
+
+    timeLogger.end('media-handler');
 
     if (mediaResponse) {
       return mediaResponse;
@@ -24,9 +34,11 @@ module.exports = async function (context, body, bot) {
 
     const chatId = body.message.chat.id;
 
+    logger.info({ chatId, prompt }, LOG_KEY);
+
     switch (prompt) {
       case '/clear':
-        context.log('Clearing chat history');
+        logger.info('Clearing chat history...', LOG_KEY);
 
         await chatDao.deleteHistory(chatId);
 
@@ -35,14 +47,14 @@ module.exports = async function (context, body, bot) {
         return resUtil.success(staticBotMsgs.CLEAR_HISTORY);
 
       case '/start':
-        context.log(logMsgs.getConvoStarted(chatId));
+        logger.info(logMsgs.getConvoStarted(chatId), LOG_KEY);
 
         await bot.sendMessage(chatId, staticBotMsgs.START_CHAT);
 
         return resUtil.success(logMsgs.getConvoStarted(chatId));
 
       case '/help':
-        context.log(logMsgs.getHelpMessageSent(chatId));
+        logger.info(logMsgs.getHelpMessageSent(chatId), LOG_KEY);
 
         await bot.sendMessage(chatId, help_text.help);
 
@@ -53,8 +65,16 @@ module.exports = async function (context, body, bot) {
 
     const handlerFunc = require(`../request-handlers/${handler}`);
 
-    return handlerFunc({ prompt, chatId, bot, body });
+    timeLogger.start(`running-${handler}-function`);
+
+    const funcRes = await handlerFunc({ prompt, chatId, bot, body });
+
+    timeLogger.end(`running-${handler}-function`);
+
+    return funcRes;
   } catch (err) {
     throw err;
+  } finally {
+    timeLogger.log();
   }
 };

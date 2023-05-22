@@ -4,13 +4,19 @@ const aiDao = require('../../daos/open-AI');
 const documentProcessor = require('../../utils/document-processor');
 const { logMsgs, staticBotMsgs, dynamicBotMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
+const { logger } = require('@azure/storage-blob');
+const TimeLogger = require('../../utils/timelogger');
 
-async function service(context, body, bot) {
+async function service(body, bot) {
   const message = body.message?.text;
   const chatId = body.message?.chat?.id;
 
+  if (!chatId) throw new Error(logMsgs.NO_CHAT_ID);
+
+  const timeLogger = new TimeLogger(`PROCESS-DOC-DURATION-${Date.now()}`);
+
   try {
-    let promptKey = message.match(DOC_REGEX) || [''];
+    let promptKey = message.substring(0, 50).match(DOC_REGEX) || [''];
     promptKey = promptKey[0].split(' ');
 
     const isResume = promptKey[0].includes('resume');
@@ -22,30 +28,45 @@ async function service(context, body, bot) {
     }
     const prompt = message.replace(DOC_REGEX, '').trim();
 
+    timeLogger.start('get-file');
     const file = await fileContainerDAO.findDocument(uniqueId);
 
     const fileUrl = await bot.getFileLink(uniqueId);
+    timeLogger.end('get-file');
 
+    timeLogger.start('processing-document');
     const { fileName, textInput } = await documentProcessor.retrieveDocument({
       fileUrl,
       body,
       file,
     });
+    timeLogger.end('processing-document');
 
     await bot.sendMessage(chatId, dynamicBotMsgs.getDocUpdate(isResume));
 
+    timeLogger.start('optimizing-document');
+
     const AIChoices = await aiDao.optimizeDocument(textInput, prompt, isResume);
+
+    timeLogger.end('optimizing-document');
 
     await bot.sendMessage(chatId, staticBotMsgs.ALMOST_DONE);
 
     const optimizedDoc = (AIChoices[0].message.content + '').replace(/""/g, '');
 
+    timeLogger.start('creating-pdf');
+
     const pdf = documentProcessor.createPDF(optimizedDoc);
+
+    timeLogger.end('creating-pdf');
 
     await bot.sendMessage(chatId, staticBotMsgs.ALMOST_DONE_2 + '\n\n' + 'Uploading ☁️☁️');
 
+    timeLogger.start('uploading-pdf');
 
     const blobUrl = await documentProcessor.uploadToBlob(pdf, fileName);
+
+    timeLogger.end('uploading-pdf');
 
     await bot.sendMessage(
       chatId,
@@ -58,9 +79,11 @@ async function service(context, body, bot) {
 
     error.message = `${logMsgs.INTERNAL_ERROR} - ${error.message}`;
 
-    context.log('Error occurred:', error);
+    logger.error(error, `PROCESS-DOC-WORKER-ERROR-${Date.now()}`);
 
     throw error;
+  } finally {
+    timeLogger.log();
   }
 }
 

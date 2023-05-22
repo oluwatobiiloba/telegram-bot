@@ -17,6 +17,7 @@ module.exports = {
   NO_HTML_CONTENT: 'Could not get content from HTML document',
   NO_PLAYLIST_TRACK_INFO: 'Could not get playlist track information',
   NO_SPOTIFY_USER_ID: 'Spotify Id is required to generate playlist',
+  NO_CHAT_ID: 'Could not get ChatID',
   getFileUploadSuccess: (fileId) => `File Upload Successful. Id: ${fileId}`,
   getConvoStarted: (chatId) => `Conversation started with id - ${chatId}`,
   getHelpMessageSent: (chatId) => `Help message sent to id - ${chatId}`,

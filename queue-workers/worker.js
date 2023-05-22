@@ -1,26 +1,25 @@
-require('dotenv').config();
 const appInsights = require('applicationinsights');
 const { Worker } = require('bullmq');
 const config = require('./config');
 const constants = require('../utils/constants');
+const logger = require('../utils/logger');
 
 appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
 const workerFunc = async (job) => {
-  const { body, context, bot } = job.data;
+  const { body, bot } = job.data;
 
   const service = require(`../services/worker/${job.name}`);
-  const response = await service(context, body, bot);
+  const response = await service(body, bot);
 
-  context.log('Job completed', response);
   return response;
 };
 
 const worker = new Worker(constants.CHATBOX_QUEUE_NAME, workerFunc, config.getWithConcurrency(5));
 
 worker.on('completed', (job) => {
-  console.log(`Completed job: ${JSON.stringify(job)}`);
-
+  logger.info(`Completed job:\n${job}`, job.id);
+  logger.flush;
   appInsights.defaultClient.trackEvent({
     name: 'Job completed',
     properties: {
@@ -31,8 +30,8 @@ worker.on('completed', (job) => {
 });
 
 worker.on('failed', (job, error) => {
-  console.log(`Failed job ${JSON.stringify(job)} with error ${error.message}`);
-
+  logger.error(`Failed job with error ${error.message}:\n${job}`, job.id);
+  logger.flush();
   appInsights.defaultClient.trackException({
     exception: error,
     properties: {
