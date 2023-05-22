@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { promptMsgs, logMsgs } = require('../messages');
 const { OPEN_AI_CHAT_URL, OPEN_AI_IMG_URL } = require('../utils/constants');
+const {APIError} = require('../utils/error-handler');
 
 const openAI = axios.create({
   baseURL: process.env.OPEN_AI_URL,
@@ -23,7 +24,7 @@ module.exports = {
 
       return this.prompt(apiPrompt, true);
     } catch (err) {
-      throw err;
+      throw APIError(err);
     }
   },
 
@@ -47,7 +48,7 @@ module.exports = {
 
       return response.data.choices;
     } catch (err) {
-      throw err;
+      throw APIError(err);
     }
   },
 
@@ -57,7 +58,7 @@ module.exports = {
 
       return response.data.data;
     } catch (err) {
-      throw err;
+      throw APIError(err);
     }
   },
 };

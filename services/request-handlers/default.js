@@ -1,6 +1,6 @@
 const chatDao = require('../../daos/chat-history');
 const aiDao = require('../../daos/open-AI');
-const { logMsgs } = require('../../messages');
+const { logMsgs, staticBotMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
 
 module.exports = async function ({ prompt, chatId, bot }) {
@@ -10,7 +10,7 @@ module.exports = async function ({ prompt, chatId, bot }) {
 
     if (chatHistory.length > 7) chatHistory.shift();
 
-    const promptMessages = chatHistory.filter(({ context }) => context && context.length < 1000);
+    const promptMessages = chatHistory.filter(({ content }) => content && content.length < 1000);
 
     const choices = await aiDao.prompt(promptMessages);
 

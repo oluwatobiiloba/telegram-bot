@@ -31,7 +31,7 @@ async function _getSongIds(songList, accessToken) {
 
     return songIds.filter(Boolean);
   } catch (error) {
-    throw error;
+    throw APIError(error);;
   }
 }
 
@@ -131,7 +131,7 @@ module.exports = {
 
       return response.data.access_token;
     } catch (err) {
-      throw err;
+      throw APIError(err);
     }
   },
 
@@ -169,7 +169,7 @@ module.exports = {
 
       return playlistURL;
     } catch (error) {
-      throw error;
+      throw APIError(err);
     }
   },
 };

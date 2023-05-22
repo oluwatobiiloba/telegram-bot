@@ -17,7 +17,7 @@ module.exports = async function (context, body, bot) {
       response = resUtil.success(logMsgs.REMOVED_FROM_GROUP);
     }
 
-    if (body.message.video_note) {
+    if (body.message?.video_note) {
       await bot.sendMessage(chatId, staticBotMsgs.CANT_PROCESS_VIDEO_NOTES);
 
       context.log(logMsgs.CANT_PROCESS_VIDEO_NOTES);

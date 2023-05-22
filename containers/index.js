@@ -9,6 +9,4 @@ const client = new CosmosClient({
 
 const db = client.database(process.env.COSMOS_DB);
 
-module.exports = dirReader(__dirname, module.filename, false, (_, content, items) => {
-  items[content.config.name] = content(db.container(content.config.name));
-});
+module.exports = dirReader(__dirname, module.filename, false, (content) => content(db.container(content.config.name)));

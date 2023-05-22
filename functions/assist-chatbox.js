@@ -7,7 +7,7 @@ const { ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK } = process.env;
 const bot = createBot(ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK);
 
 app.http('assist_chatbox', {
-  methods: ['GET', 'POST'],
+  methods: ['POST'],
   authLevel: 'anonymous',
   handler: (request, context) => chatBox(request, context, bot),
 });

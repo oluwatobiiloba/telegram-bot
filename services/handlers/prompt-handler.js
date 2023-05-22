@@ -5,9 +5,8 @@ const resUtil = require('../../utils/res-util');
 const promptMapper = require('../../utils/prompt-mapper');
 
 module.exports = async function (context, body, bot) {
-  context.log('Request body', body);
   try {
-    const mediaResponse = mediaHandler(context, body, bot);
+    const mediaResponse = await mediaHandler(context, body, bot);
 
     if (mediaResponse) {
       return mediaResponse;

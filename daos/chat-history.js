@@ -1,20 +1,20 @@
-const { chatHistory } = require('../containers');
+const { chathistory } = require('../containers');
 
 module.exports = {
   createHistory(id) {
     const idStr = id.toString();
 
-    return chatHistory.create(idStr);
+    return chathistory.create(idStr);
   },
 
   async getHistory(id) {
     let history = [];
     const idStr = id.toString();
 
-    const { resource } = await chatHistory.get(idStr);
+    const { resource } = await chathistory.get(idStr);
 
     if (!resource) {
-      await chatHistory.create(idStr);
+      await chathistory.create(idStr);
     } else {
       history = resource.chatHistory;
     }
@@ -41,7 +41,7 @@ module.exports = {
     const history = await this.getHistory(id);
     history.push(...messages);
 
-    return chatHistory.update(idStr, history);
+    return chathistory.update(idStr, history);
   },
 
   overwriteHistory(id, messages) {
@@ -50,13 +50,13 @@ module.exports = {
     let history = messages;
 
     if (!Array.isArray(messages)) history = [messages];
-    
-    return chatHistory.update(idStr, history);
+
+    return chathistory.update(idStr, history);
   },
 
   deleteHistory(id) {
     const idStr = id.toString();
 
-    return chatHistory.delete(idStr);
+    return chathistory.delete(idStr);
   },
 };

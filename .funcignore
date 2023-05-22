@@ -1,6 +1,6 @@
 *.js.map
-    *.ts
-        .git *
+*.ts
+.git *
 .vscode
 __azurite_db * __.json
 __blobstorage__
@@ -8,4 +8,5 @@ __queuestorage__
 local.settings.json
 test
 tsconfig.json
-    *.env1
+*.env1
+azurite

@@ -1,12 +1,12 @@
 const response = (code, error, resData) => {
   let body = {
+    code,
     message: 'error',
     data: null,
   };
 
   if (error) {
     body.message = error.message;
-    body.error = error;
   } else {
     body.message = 'success';
 
@@ -17,7 +17,11 @@ const response = (code, error, resData) => {
     }
   }
 
-  return { status: code, body };
+  return {
+    status: code,
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  };
 };
 
 module.exports = {

@@ -37,7 +37,7 @@ function reader(dirname, baseFile, isRecursive, format) {
 }
 
 module.exports = (dirname, baseFile, recursive, format) => {
-  if (!dirname || basefile) throw new Error('Directory name and base file is required');
+  if (!dirname || !baseFile) throw new Error('Directory name and base file is required');
 
   const baseFilename = path.basename(baseFile) || 'index.js';
 

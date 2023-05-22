@@ -2,13 +2,14 @@
   "name": "maya",
   "version": "1.0.0",
   "description": "",
+  "main": "functions/*.js",
   "scripts": {
-    "start": "func start node queue-workers/worker.js",
+    "start": "func start node16 queue-workers/worker.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
     "@azure/cosmos": "3.9.1",
-    "@azure/functions": "^4.0.0-alpha.7",
+    "@azure/functions": "^4.0.0-alpha.10",
     "@azure/storage-blob": "^12.13.0",
     "@bull-board/api": "^5.0.0",
     "@bull-board/express": "^5.0.0",
@@ -37,6 +38,5 @@
     "querystring": "^0.2.1",
     "stream": "^0.0.2",
     "telegraf": "^4.12.2"
-  },
-  "main": "src/functions/*.js"
+  }
 }
