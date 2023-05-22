@@ -1,9 +1,9 @@
 {
-  "name": "azure-functions",
+  "name": "maya",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "func start node worker.js",
+    "start": "func start node queue-workers/worker.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "form-data": "^4.0.0",
     "jsdom": "^22.0.0",
     "jspdf": "^2.5.1",
+    "md5": "^2.3.0",
     "multer": "^1.4.5-lts.1",
     "natural": "^6.2.0",
     "node-fetch": "^3.3.1",
