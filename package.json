@@ -1,17 +1,20 @@
 {
-  "name": "azure-functions",
+  "name": "maya",
   "version": "1.0.0",
   "description": "",
+  "main": "functions/*.js",
   "scripts": {
-    "start": "func start node worker.js",
+    "start": "node app.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
     "@azure/cosmos": "3.9.1",
-    "@azure/functions": "^4.0.0-alpha.7",
+    "@azure/functions": "^4.0.0-alpha.10",
     "@azure/storage-blob": "^12.13.0",
     "@bull-board/api": "^5.0.0",
     "@bull-board/express": "^5.0.0",
+    "@logtail/node": "^0.4.0",
+    "@logtail/pino": "^0.4.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "applicationinsights": "^2.5.1",
     "axios": "^1.3.4",
@@ -24,6 +27,7 @@
     "form-data": "^4.0.0",
     "jsdom": "^22.0.0",
     "jspdf": "^2.5.1",
+    "md5": "^2.3.0",
     "multer": "^1.4.5-lts.1",
     "natural": "^6.2.0",
     "node-fetch": "^3.3.1",
@@ -32,10 +36,11 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^3.4.120",
+    "pino": "^8.14.1",
+    "pino-pretty": "^10.0.0",
     "qs": "^6.11.1",
     "querystring": "^0.2.1",
     "stream": "^0.0.2",
     "telegraf": "^4.12.2"
-  },
-  "main": "src/functions/*.js"
+  }
 }
