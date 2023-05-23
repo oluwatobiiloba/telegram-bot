@@ -15,7 +15,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
 
-    const playlistMessage = prompt.replace('create a playlist', promptMsgs.CREATE_PLAYLIST);
+    // const playlistMessage = prompt.replace('create a playlist', `${promptMsgs.CREATE_PLAYLIST}`);
+    const playlistMessage = `${prompt}, ${promptMsgs.CREATE_PLAYLIST}`;
 
     timeLogger.start('getting-AI-list');
 
@@ -32,6 +33,7 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
     const aiReply = choices[0]?.message?.content;
 
     let songList = aiReply.substring(aiReply.indexOf('['), aiReply.lastIndexOf(']') + 1);
+
     songList = JSON.parse(songList);
 
     logger.info({ prompt: playlistMessage, aiResponse: songList}, `CREATE-PLAYLIST-${Date.now()}`);

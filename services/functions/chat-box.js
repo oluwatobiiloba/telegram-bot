@@ -31,7 +31,7 @@ async function service(request, bot) {
 
     logger.error(error, 'CHAT-BOX-ERROR');
 
-    return resUtil.error(500, error);
+    return resUtil.error(200, error);
   } finally {
     logger.flush();
   }

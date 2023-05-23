@@ -1,0 +1,40 @@
+[
+  {
+    "_id": "35cf6520-cc0d-4286-8388-b93bd82a9c79",
+    "colId": "history",
+    "containerId": "",
+    "name": "http://127.0.0.1:7071/api/assist_chatbox",
+    "url": "http://127.0.0.1:7071/api/assist_chatbox",
+    "method": "POST",
+    "sortNum": 0,
+    "created": "2023-05-23T20:26:45.862Z",
+    "modified": "2023-05-23T20:53:31.424Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"/resume 6996b0f563a99b2f1cab81b2006619a9 I want to apply for a junior developer role with google. Kindly help with a cover letter\"\n  }\n}",
+      "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "617f4652-6734-4372-85b9-8cbb31cd5d9f",
+    "colId": "history",
+    "containerId": "",
+    "name": "http://127.0.0.1:7071/api/chatbox",
+    "url": "http://127.0.0.1:7071/api/chatbox",
+    "method": "POST",
+    "sortNum": 0,
+    "created": "2023-05-23T21:25:45.523Z",
+    "modified": "2023-05-23T22:06:41.789Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"/Create a playlist for me. I'm about to go on long walk to clear my head. I need songs that'll help improve my mood with artists like jcole and pharell\"\n  }\n}",
+      "form": []
+    },
+    "tests": []
+  }
+]
