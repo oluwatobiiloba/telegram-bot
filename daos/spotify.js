@@ -1,6 +1,7 @@
 const axios = require('axios');
 const qs = require('qs');
 const { logMsgs } = require('../messages');
+const { APIError } = require('../utils/error-handler');
 
 const { CLIENT_ID, CLIENT_SECRET } = process.env;
 
@@ -18,12 +19,14 @@ async function _getSongIds(songList, accessToken) {
         params: { limit: 1 },
         transformResponse: [
           function (data) {
-            return data.tracks?.items;
+            const dataObj = JSON.parse(data);
+            return dataObj.tracks?.items;
           },
         ],
       });
 
       const trackItems = response.data;
+      //console.log(trackItems);
       if (trackItems?.length) return trackItems[0].id;
     });
 
@@ -31,7 +34,7 @@ async function _getSongIds(songList, accessToken) {
 
     return songIds.filter(Boolean);
   } catch (error) {
-    throw APIError(error);;
+    throw APIError(error);
   }
 }
 
@@ -77,32 +80,27 @@ function _addTracksToPlaylist(id, songURIs, accessToken) {
 
 function resolvePlaylistDetails(config) {
   const details = {
-    // name: `${username + "'s" || 'Your'} Playlist by Maya`,
     name: 'Your Playlist by Maya',
     description: 'Playlist created by Maya',
   };
 
   if (config.name) {
-    let name = details.name;
+    let name;
 
-    name = name.replace('Your', config.name);
+    name = config.name;
 
     if (config.isConverted) {
-      name = name.replace('by Maya', '(converted by Maya)');
+      name += ' (converted by Maya)';
     }
 
     details.name = name;
   } else if (config.user?.username) {
-    details.name = details.name.replace('Your', config.user.username + "'s");
+    details.name = config.user.username + "'s Playlist by Maya";
   }
 
   if (config.author) {
     details.description = details.description.replace('Maya', config.author);
   }
-
-  // if (config.description) {
-  //   details.description = details.description + '\n' + config.description;
-  // }
 
   return details;
 }
@@ -137,11 +135,12 @@ module.exports = {
 
   async createPlaylist(songList, accessToken, config) {
     try {
-      if (!config.user.id) throw new Error(logMsgs.NO_SPOTIFY_USER_ID);
-      
+      const userId = config?.user?.id;
+      if (!userId) throw new Error(logMsgs.NO_SPOTIFY_USER_ID);
+
       const songIds = await _getSongIds(songList, accessToken);
 
-      if (songIds?.length) throw new Error(logMsgs.NO_SONG_IDS);
+      if (!songIds?.length) throw new Error(logMsgs.NO_SONG_IDS);
 
       const songURIs = [];
 
@@ -151,7 +150,7 @@ module.exports = {
 
       const playlistConfig = resolvePlaylistDetails(config);
 
-      const response = await _createPlaylist(user.id, accessToken, playlistConfig);
+      const response = await _createPlaylist(userId, accessToken, playlistConfig);
 
       const playlistId = response.data.id;
       const playlistURL = response.data.external_urls.spotify;
@@ -168,7 +167,8 @@ module.exports = {
       await _addTracksToPlaylist(playlistId, songURIs, accessToken);
 
       return playlistURL;
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
       throw APIError(err);
     }
   },

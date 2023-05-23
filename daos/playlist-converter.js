@@ -1,6 +1,6 @@
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
-const { logMsgs } = require('../../messages');
+const { logMsgs } = require('../messages');
 
 module.exports = {
   async appleToSpotify(appleUrl) {
@@ -60,8 +60,7 @@ module.exports = {
         const { data } = await axios.get(imageContent, {
           responseType: 'arraybuffer',
         });
-
-        imageData = Buffer.from(data.data, 'binary').toString('base64');
+        if (data?.data) imageData = Buffer.from(data.data, 'binary').toString('base64');
       }
 
       if (imageData) funcResponse.image = imageData;

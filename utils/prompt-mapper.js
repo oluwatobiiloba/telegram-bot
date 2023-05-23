@@ -8,11 +8,12 @@ const requestHandlerMapper = {
 module.exports = (prompt) => {
   let handler = 'default';
 
-  if (APPLE_REGEX.test(prompt.substring(0, 50))) {
+  if (APPLE_REGEX.test(prompt)) {
     handler = 'convert-apple-playlist';
   } else {
+    const lowerPrompt = prompt.toLowerCase();
     for (let key of Object.keys(requestHandlerMapper)) {
-      if (prompt.includes(key)) {
+      if (lowerPrompt.includes(key)) {
         handler = requestHandlerMapper[key];
         break;
       }

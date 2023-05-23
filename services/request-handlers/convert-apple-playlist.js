@@ -1,11 +1,12 @@
 const playlistConverter = require('../../daos/playlist-converter');
 const musicDao = require('../../daos/spotify');
-const { staticBotMsgs, logMsgs } = require('../../messages');
+const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require('../../messages');
 const { APPLE_REGEX } = require('../../utils/constants');
+const resUtil = require('../../utils/res-util');
 const TimeLogger = require('../../utils/timelogger');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
-  const appleUrl = prompt.substring(0, 70).match(APPLE_REGEX)[0];
+  const appleUrl = prompt.match(APPLE_REGEX)[0];
 
   const timeLogger = new TimeLogger(`CONVERT-APPLE-PLAYLIST-DURATION-${Date.now()}`);
 
@@ -65,6 +66,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
       funcResponse = resUtil.success(logMsgs.NO_PLAYLIST_GENERATED);
     }
+
+    return funcResponse
   } catch (err) {
     await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
 

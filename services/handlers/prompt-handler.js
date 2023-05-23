@@ -24,7 +24,7 @@ module.exports = async function (body, bot) {
 
     if (!body.message) throw new Error('No message');
 
-    const prompt = body.message.text?.toLowerCase();
+    const prompt = body.message.text;
 
     if (!prompt) {
       await bot.sendMessage(chatId, staticBotMsgs.NO_PROMPT);
@@ -36,7 +36,7 @@ module.exports = async function (body, bot) {
 
     logger.info({ chatId, prompt }, LOG_KEY);
 
-    switch (prompt) {
+    switch (prompt.toLowerCase()) {
       case '/clear':
         logger.info('Clearing chat history...', LOG_KEY);
 

@@ -8,12 +8,19 @@ logger.use(function (log) {
     level: log.level.toUpperCase(),
     tag: log.message || 'LOG-DATA-' + Date.now(),
     data: log.data,
+    error: log.error,
   };
 });
 
 module.exports = {
-  error(data, key) {
-    logger.error(key, { data });
+  error(err, key) {
+    logger.error(key, {
+      error: {
+        message: err.message,
+        stackTrace: err.stack,
+        context: err.context,
+      },
+    });
   },
   warn(data, key) {
     logger.warn(key, { data });
