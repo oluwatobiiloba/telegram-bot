@@ -4,8 +4,9 @@ const { BlobServiceClient } = require('@azure/storage-blob');
 const { jsPDF } = require('jspdf');
 
 module.exports = {
-  async retrieveDocument(fileUrl, body, file) {
+  async retrieveDocument({fileUrl, body, file}) {
     try {
+
       const fileResponse = await axios.get(fileUrl, { responseType: 'arraybuffer' });
 
       const text = await pdfParse(fileResponse.data);

@@ -12,7 +12,7 @@ async function service(request, bot) {
   try {
     let response;
 
-    if (DOC_REGEX.test(prompt.substring(0, 50))) {
+    if (DOC_REGEX.test(prompt?.substring(0, 50))) {
       const job = await docQueue.add(JOB_PROCESS_DOC, { body, bot });
 
       await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(job.id));
@@ -31,7 +31,7 @@ async function service(request, bot) {
 
     logger.error(error, 'CHAT-BOX-ERROR');
 
-    return resUtil.error(500, error);
+    return resUtil.error(200, error);
   } finally {
     logger.flush();
   }

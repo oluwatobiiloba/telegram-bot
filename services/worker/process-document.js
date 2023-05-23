@@ -31,7 +31,9 @@ async function service(body, bot) {
     timeLogger.start('get-file');
     const file = await fileContainerDAO.findDocument(uniqueId);
 
-    const fileUrl = await bot.getFileLink(uniqueId);
+    const file_id = file.document.file_id.trim();
+
+    const fileUrl = await bot.getFileLink(file_id);
     timeLogger.end('get-file');
 
     timeLogger.start('processing-document');
