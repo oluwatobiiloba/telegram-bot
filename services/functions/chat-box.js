@@ -12,7 +12,7 @@ async function service(request, bot) {
   try {
     let response;
 
-    if (DOC_REGEX.test(prompt.substring(0, 50))) {
+    if (DOC_REGEX.test(prompt?.substring(0, 50))) {
       const job = await docQueue.add(JOB_PROCESS_DOC, { body, bot });
 
       await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(job.id));

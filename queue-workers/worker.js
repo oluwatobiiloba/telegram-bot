@@ -19,7 +19,7 @@ const worker = new Worker(constants.CHATBOX_QUEUE_NAME, workerFunc, config.getWi
 
 worker.on('completed', (job) => {
   logger.info(`Completed job:\n${job}`, job.id);
-  logger.flush;
+  logger.flush();
   appInsights.defaultClient.trackEvent({
     name: 'Job completed',
     properties: {
@@ -42,3 +42,4 @@ worker.on('failed', (job, error) => {
 });
 
 console.log('BullMQ worker started');
+logger.info(`BullMQ worker started at ${new Date().toISOString()} on ${process.env.ENV}.`);
