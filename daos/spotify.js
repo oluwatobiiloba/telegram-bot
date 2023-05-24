@@ -42,9 +42,10 @@ function _setPlaylistImage(image, playlistID, accessToken) {
   return axios({
     method: 'put',
     url: `${BASE_URL}/playlists/${playlistID}/images`,
-    image,
+    data: image,
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'image/jpeg',
     },
   });
 }
@@ -156,19 +157,17 @@ module.exports = {
       await _addTracksToPlaylist(playlistId, songURIs, accessToken);
 
       // This bit is not super important so if it fails not a major problem
-        if (config.image) {
-          try {
-            await _setPlaylistImage(config.image, playlistId, accessToken);
-          } catch (e) {
-            logger.error('Failed to set playlist image', e);
-            logger.error('Image Data: ', config.image);
-            console.log(e);
-          }
+      if (config.image) {
+        try {
+          await _setPlaylistImage(config.image, playlistId, accessToken);
+        } catch (e) {
+          e.message = `Failed to set playlist image - ${e.message}`;
+          logger.error(e, 'SET-PLAYLIST-IMAGE-ERROR');
         }
+      }
 
       return playlistURL;
     } catch (err) {
-      console.log(err);
       throw APIError(err);
     }
   },
