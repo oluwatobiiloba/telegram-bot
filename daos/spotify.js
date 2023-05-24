@@ -2,7 +2,7 @@ const axios = require('axios');
 const qs = require('qs');
 const { logMsgs } = require('../messages');
 const { APIError } = require('../utils/error-handler');
-
+const logger = require('../utils/logger');
 const { CLIENT_ID, CLIENT_SECRET } = process.env;
 
 const BASE_URL = 'https://api.spotify.com/v1';
@@ -160,6 +160,8 @@ module.exports = {
         try {
           await _setPlaylistImage(config.image, playlistId, accessToken);
         } catch (e) {
+          logger.error('Failed to set playlist image', e);
+          logger.error('Image Data: ', config.image);
           console.log(e);
         }
       }
