@@ -42,9 +42,7 @@ function _setPlaylistImage(image, playlistID, accessToken) {
   return axios({
     method: 'put',
     url: `${BASE_URL}/playlists/${playlistID}/images`,
-    data: {
     image,
-    },
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
