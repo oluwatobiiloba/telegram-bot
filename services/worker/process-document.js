@@ -4,7 +4,7 @@ const aiDao = require('../../daos/open-AI');
 const documentProcessor = require('../../utils/document-processor');
 const { logMsgs, staticBotMsgs, dynamicBotMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
-const { logger } = require('@azure/storage-blob');
+const logger = require('../../utils/logger');
 const TimeLogger = require('../../utils/timelogger');
 
 async function service(body, bot) {
@@ -29,12 +29,18 @@ async function service(body, bot) {
     const prompt = message.replace(DOC_REGEX, '').trim();
 
     timeLogger.start('get-file');
+
     const file = await fileContainerDAO.findDocument(uniqueId);
 
-    const file_id = file.document.file_id.trim();
+    const fileId = file?.document?.file_id?.trim();
 
-    const fileUrl = await bot.getFileLink(file_id);
+    if (!fileId) {
+      throw new Error(logMsgs.NO_DOCUMENT_FOUND);
+    }
+
+    const fileUrl = await bot.getFileLink(fileId);
     timeLogger.end('get-file');
+
 
     timeLogger.start('processing-document');
     const { fileName, textInput } = await documentProcessor.retrieveDocument({
@@ -79,9 +85,7 @@ async function service(body, bot) {
   } catch (error) {
     await bot.sendMessage(chatId, staticBotMsgs.INTERNAL_ERROR);
 
-    error.message = `${logMsgs.INTERNAL_ERROR} - ${error.message}`;
-
-    logger.error(error, `PROCESS-DOC-WORKER-ERROR-${Date.now()}`);
+    error.message = `PROCESS-DOC-WORKER-${logMsgs.INTERNAL_ERROR} -> ${error.message}`;
 
     throw error;
   } finally {

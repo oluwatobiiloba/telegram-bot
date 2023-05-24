@@ -45,18 +45,17 @@ module.exports = async function (body, bot) {
 
       timeLogger.start('uploading-document');
 
-      document.upload_id = md5(String(document.file_id)).toLowerCase();
-      //document.file_id = md5(String(document.file_id)).toLowerCase();
+      document.id = md5(String(document.file_id)).toLowerCase();
       document.chatId = chatId;
 
       await fileDao.uploadDocument(document);
       timeLogger.end('uploading-document');
 
-      await bot.sendMessage(chatId, dynamicBotMsgs.getDocReceived(document.upload_id));
+      await bot.sendMessage(chatId, dynamicBotMsgs.getDocReceived(document.id));
 
-      logger.info(logMsgs.getFileUploadSuccess(document.file_id), LOG_KEY);
+      logger.info(logMsgs.getFileUploadSuccess(document.id), LOG_KEY);
 
-      response = resUtil.success(logMsgs.getFileUploadSuccess(document.file_id));
+      response = resUtil.success(logMsgs.getFileUploadSuccess(document.id));
     }
 
     return response;

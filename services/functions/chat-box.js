@@ -6,10 +6,10 @@ const promptHandler = require('../handlers/prompt-handler');
 const logger = require('../../utils/logger');
 
 async function service(request, bot) {
-  const body = await request.json();
-  const prompt = body.message?.text;
-
   try {
+    const body = await request.json();
+    const prompt = body.message?.text;
+
     let response;
 
     if (DOC_REGEX.test(prompt?.substring(0, 50))) {
@@ -19,7 +19,7 @@ async function service(request, bot) {
 
       response = resUtil.success(logMsgs.JOB_QUEUED);
 
-      logger.info(response, job.id);
+      logger.info(response, `JOB-QUEUED-${job.id}`);
     } else {
       response = await promptHandler(body, bot);
       logger.info(response, `CHAT-BOX-${Date.now()}`);
