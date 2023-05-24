@@ -37,7 +37,7 @@ module.exports = {
             return {
               name: track.name,
               artist,
-              album,
+              album
             };
           }
         }
@@ -53,14 +53,14 @@ module.exports = {
       const imageContent = document
         .querySelector("meta[property='og:image']")
         ?.getAttribute('content');
-
+      
       let imageData;
 
       if (imageContent) {
         const { data } = await axios.get(imageContent, {
           responseType: 'arraybuffer',
         });
-        if (data?.data) imageData = Buffer.from(data.data, 'binary').toString('base64');
+        if (data) imageData = Buffer.from(data, 'binary').toString('base64');
       }
 
       if (imageData) funcResponse.image = imageData;

@@ -27,12 +27,12 @@
     "method": "POST",
     "sortNum": 0,
     "created": "2023-05-23T21:25:45.523Z",
-    "modified": "2023-05-23T22:06:41.789Z",
+    "modified": "2023-05-24T06:59:01.766Z",
     "headers": [],
     "params": [],
     "body": {
       "type": "json",
-      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"/Create a playlist for me. I'm about to go on long walk to clear my head. I need songs that'll help improve my mood with artists like jcole and pharell\"\n  }\n}",
+      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"https://music.apple.com/ng/playlist/no-kisses-on-the-forehead/pl.u-DdANv1Bs0g843zB\"\n  }\n}",
       "form": []
     },
     "tests": []

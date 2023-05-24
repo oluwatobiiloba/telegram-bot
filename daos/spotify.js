@@ -43,7 +43,7 @@ function _setPlaylistImage(image, playlistID, accessToken) {
     method: 'put',
     url: `${BASE_URL}/playlists/${playlistID}/images`,
     data: {
-      image,
+    image,
     },
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -135,6 +135,8 @@ module.exports = {
 
   async createPlaylist(songList, accessToken, config) {
     try {
+
+      console.log('config', config)
       const userId = config?.user?.id;
       if (!userId) throw new Error(logMsgs.NO_SPOTIFY_USER_ID);
 
