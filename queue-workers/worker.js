@@ -1,19 +1,18 @@
 const appInsights = require('applicationinsights');
-const TelegramBot = require('node-telegram-bot-api');
 const { Worker } = require('bullmq');
 const config = require('./config');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
-
 
 appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
 const workerFunc = async (job) => {
   const { body, bot } = job.data;
 
-  const worker_bot = new TelegramBot(bot.token);
+  const workerBot = createTelegramBot(bot.token);
+
   const service = require(`../services/worker/${job.name}`);
-  const response = await service(body,worker_bot);
+  const response = await service(body,workerBot);
 
   return response;
 };
@@ -21,8 +20,14 @@ const workerFunc = async (job) => {
 const worker = new Worker(constants.CHATBOX_QUEUE_NAME, workerFunc, config.getWithConcurrency(5));
 
 worker.on('completed', (job) => {
-  logger.info(`Completed job:\n${job.returnvalue}`, job.id);
+  const logData = {
+    message: 'Completed job',
+    resData: job.returnvalue,
+  };
+
+  logger.info(logData, `JOB-COMPLETED-${job.id}`);
   logger.flush();
+
   appInsights.defaultClient.trackEvent({
     name: 'Job completed',
     properties: {
@@ -33,8 +38,11 @@ worker.on('completed', (job) => {
 });
 
 worker.on('failed', (job, error) => {
-  logger.error(`Failed job with error ${error.message}:\n${job}`, job.id);
+  error.message = `Failed job with error: ${error.message}`;
+
+  logger.error(error, `JOB-FAILED-${job.id}`);
   logger.flush();
+
   appInsights.defaultClient.trackException({
     exception: error,
     properties: {

@@ -3,8 +3,8 @@ const { file } = require('../containers');
 module.exports = {
   uploadDocument(document) {
     return file.create({
-      id: document.upload_id,
-      partitionKey: document.upload_id,
+      id: document.id,
+      partitionKey: document.id,
       document: document,
       chatId: document.chatId,
     });
