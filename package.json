@@ -5,6 +5,7 @@
   "main": "functions/*.js",
   "scripts": {
     "start": "node app.js",
+    "start-local":"node functions/app.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
