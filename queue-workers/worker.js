@@ -3,6 +3,7 @@ const { Worker } = require('bullmq');
 const config = require('./config');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
+const createTelegramBot = require('../utils/createTelegramBot');
 
 appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
@@ -53,4 +54,4 @@ worker.on('failed', (job, error) => {
 });
 
 console.log('BullMQ worker started');
-logger.info(`BullMQ worker started at ${new Date().toISOString()} on ${process.env.ENV}.`);
+logger.info(`BullMQ worker started at ${new Date().toISOString()} on ${process.env.ENV}/${process.platform}.`);
