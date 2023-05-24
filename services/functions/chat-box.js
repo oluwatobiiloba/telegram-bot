@@ -9,11 +9,13 @@ async function service(request, bot) {
   try {
     const body = await request.json();
     const prompt = body.message?.text;
+    const bot_token = bot.token;
 
     let response;
 
     if (DOC_REGEX.test(prompt?.substring(0, 50))) {
-      const job = await docQueue.add(JOB_PROCESS_DOC, { body, bot });
+      const job = await docQueue.sendMessage(JOB_PROCESS_DOC, { body, bot_token });
+      console.log('job', job);
 
       await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(job.id));
 

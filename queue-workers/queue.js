@@ -6,15 +6,21 @@ const queueClient = new QueueClient(azure_storage_connection_string, queueName);
 
 
 module.exports = {
-  async sendMessage(data) {
+  async sendMessage(name, data) {
     try {
-          
-      if (!data) throw Error('No data found');
-      if (typeof data !== 'string') data = JSON.stringify(data);
+      if (!data || !name) throw Error('No data/name found');
+      let payload = {
+         name,
+         data
+      };
 
-      //const options = { visibilityTimeout: data.visibilityTimeout || 30 };
-      await queueClient.sendMessage(data);
-      return { message: 'Action successfully to job queue' };
+      payload = JSON.stringify(payload);
+
+      const sendMessage = await queueClient.sendMessage(payload);
+      return {
+        message: 'Action successfully to job queue',
+        id: sendMessage.messageId
+      };
     } catch (error) {
       console.log(error);
       throw error;
