@@ -54,4 +54,4 @@ worker.on('failed', (job, error) => {
 });
 
 console.log('BullMQ worker started');
-logger.info(`BullMQ worker started at ${new Date().toISOString()} on ${process.env.ENV}/${process.platform}.`);
+logger.info(`BullMQ worker started at ${new Date().toISOString()} on ${process.env.ENV}/${process.platform}.`, 'WORKER-STARTED');

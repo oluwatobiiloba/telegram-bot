@@ -1,14 +1,23 @@
-const { Queue } = require('bullmq');
-const config = require('./config');
-const constants = require('../utils/constants');
 
-const queueConfig = config.get();
-queueConfig.defaultJobOptions = { attempts: 2, backoff: 1000 };
+const { QueueClient } = require("@azure/storage-queue");
+const azure_storage_connection_string = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const queueName = process.env.QUEUE_NAME;
+const queueClient = new QueueClient(azure_storage_connection_string, queueName);
 
-const queue = new Queue(constants.CHATBOX_QUEUE_NAME, queueConfig);
 
 module.exports = {
-  add(name, data, opts) {
-    return queue.add(name, data, opts);
+  async sendMessage(data) {
+    try {
+          
+      if (!data) throw Error('No data found');
+      if (typeof data !== 'string') data = JSON.stringify(data);
+
+      //const options = { visibilityTimeout: data.visibilityTimeout || 30 };
+      await queueClient.sendMessage(data);
+      return { message: 'Action successfully to job queue' };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
-};
+}
