@@ -3,6 +3,7 @@ const { Worker } = require('bullmq');
 const config = require('./config');
 const constants = require('../utils/constants');
 const logger = require('../utils/logger');
+const createTelegramBot = require('../utils/createTelegramBot');
 
 appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
