@@ -4,7 +4,6 @@
   "description": "",
   "main": "functions/*.js",
   "scripts": {
-    "start": "node app.js",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
