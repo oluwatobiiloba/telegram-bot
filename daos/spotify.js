@@ -133,8 +133,6 @@ module.exports = {
 
   async createPlaylist(songList, accessToken, config) {
     try {
-
-      console.log('config', config)
       const userId = config?.user?.id;
       if (!userId) throw new Error(logMsgs.NO_SPOTIFY_USER_ID);
 
@@ -155,18 +153,18 @@ module.exports = {
       const playlistId = response.data.id;
       const playlistURL = response.data.external_urls.spotify;
 
-      // This bit is not super important so if it fails not a major problem
-      if (config.image) {
-        try {
-          await _setPlaylistImage(config.image, playlistId, accessToken);
-        } catch (e) {
-          logger.error('Failed to set playlist image', e);
-          logger.error('Image Data: ', config.image);
-          console.log(e);
-        }
-      }
-
       await _addTracksToPlaylist(playlistId, songURIs, accessToken);
+
+      // This bit is not super important so if it fails not a major problem
+        if (config.image) {
+          try {
+            await _setPlaylistImage(config.image, playlistId, accessToken);
+          } catch (e) {
+            logger.error('Failed to set playlist image', e);
+            logger.error('Image Data: ', config.image);
+            console.log(e);
+          }
+        }
 
       return playlistURL;
     } catch (err) {
