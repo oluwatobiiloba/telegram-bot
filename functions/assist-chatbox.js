@@ -11,5 +11,3 @@ app.http('assist_chatbox', {
   authLevel: 'anonymous',
   handler: (request) => chatBox(request, bot),
 });
-
-logger.info(`Assist Chatbox Function Started at ${new Date().toISOString()} on ${process.env.ENV}/${process.platform}.`, 'BOT-FUNC-STARTED');

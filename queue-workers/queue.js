@@ -1,28 +1,20 @@
 
 const { QueueClient } = require("@azure/storage-queue");
-const azure_storage_connection_string = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const queueName = process.env.QUEUE_NAME;
-const queueClient = new QueueClient(azure_storage_connection_string, queueName);
-
+const {AZURE_STORAGE_CONNECTION_STRING, PROCESS_DOC_QUEUE} = process.env
+const queueClient = new QueueClient(AZURE_STORAGE_CONNECTION_STRING, PROCESS_DOC_QUEUE);
+const { logMsgs } = require("../messages")
 
 module.exports = {
   async sendMessage(name, data) {
     try {
-      if (!data || !name) throw Error('No data/name found');
-      let payload = {
-         name,
-         data
-      };
+      if (!data || !name) throw Error(logMsgs.NO_MESSAGE_FOUND);
 
-      payload = JSON.stringify(payload);
+      const payload = JSON.stringify({name,data})
 
       const sendMessage = await queueClient.sendMessage(payload);
-      return {
-        message: 'Action successfully to job queue',
-        id: sendMessage.messageId
-      };
+      return sendMessage.messageId
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw error;
     }
   },

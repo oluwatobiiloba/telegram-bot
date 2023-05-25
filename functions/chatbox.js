@@ -12,4 +12,3 @@ app.http('chatbox', {
   handler: (request) => chatBox(request, bot),
 });
 
-logger.info(`Chatbox Function Started at ${new Date().toISOString()} on ${process.env.ENV}/${process.platform}.`, 'BOT-FUNC-STARTED');

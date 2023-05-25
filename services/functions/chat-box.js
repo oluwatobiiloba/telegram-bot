@@ -9,15 +9,14 @@ async function service(request, bot) {
   try {
     const body = await request.json();
     const prompt = body.message?.text;
-    const bot_token = bot.token;
+    const botToken = bot.token;
 
     let response;
 
     if (DOC_REGEX.test(prompt?.substring(0, 50))) {
-      const job = await docQueue.sendMessage(JOB_PROCESS_DOC, { body, bot_token });
-      console.log('job', job);
+      const jobId = await docQueue.sendMessage(JOB_PROCESS_DOC, { body, botToken });
 
-      await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(job.id));
+      await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(jobId));
 
       response = resUtil.success(logMsgs.JOB_QUEUED);
 
