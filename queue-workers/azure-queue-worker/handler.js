@@ -15,7 +15,7 @@ module.exports = async function (message, context) {
 
 
         if (response.status === 200) {
-            logger.info(response.data, `JOB-COMPLETED-${jobId}`);
+            logger.info(response.body.data, `JOB-COMPLETED-${jobId}`);
             appInsights.defaultClient.trackEvent({
                 name: `JOB-COMPLETED-${jobId}`,
                 properties: {
