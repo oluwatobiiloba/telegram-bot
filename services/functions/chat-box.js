@@ -1,4 +1,4 @@
-const docQueue = require('../../queue-workers/queue');
+const docQueue = require('../../queue-workers/azure-queue-worker/queue');
 const resUtil = require('../../utils/res-util');
 const { logMsgs, dynamicBotMsgs } = require('../../messages');
 const { DOC_REGEX, JOB_PROCESS_DOC } = require('../../utils/constants');

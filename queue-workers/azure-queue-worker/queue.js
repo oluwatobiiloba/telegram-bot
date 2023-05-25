@@ -2,7 +2,7 @@
 const { QueueClient } = require("@azure/storage-queue");
 const {AZURE_STORAGE_CONNECTION_STRING, PROCESS_DOC_QUEUE} = process.env
 const queueClient = new QueueClient(AZURE_STORAGE_CONNECTION_STRING, PROCESS_DOC_QUEUE);
-const { logMsgs } = require("../messages")
+const { logMsgs } = require("../../messages")
 
 module.exports = {
   async sendMessage(name, data) {

@@ -1,7 +1,7 @@
 const appInsights = require('applicationinsights');
-const logger = require('../utils/logger');
-const resUtil = require('../utils/res-util');
-const createTelegramBot = require('../utils/createTelegramBot');
+const logger = require('../../utils/logger');
+const resUtil = require('../../utils/res-util');
+const createTelegramBot = require('../../utils/createTelegramBot');
 appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
 
@@ -12,13 +12,15 @@ module.exports = async function (message, context) {
         const workerBot = createTelegramBot(botToken);
         const service = require(`../services/worker/${name}`);
         const response = await service(body, workerBot);
+        const jobId = context.bindingData.id
 
         if (response.status === 200) {
-            logger.info(response.data, `JOB-COMPLETED-${name.toUpperCase()}`);
+            logger.info(response.data, `JOB-COMPLETED-${jobId}`);
             appInsights.defaultClient.trackEvent({
-                name: `JOB-COMPLETED-${name.toUpperCase()}`,
+                name: `JOB-COMPLETED-${jobId}`,
                 properties: {
-                    job: name,
+                    job: `JOB-COMPLETED-${jobId}`,
+                    id: jobId,
                   message: response.body.message,
                   result: response.body.data,
                 },
@@ -27,12 +29,12 @@ module.exports = async function (message, context) {
         return response;
     } catch (error) {
         // console.log(error);
-        logger.error(error, `JOB-FAILED-${name.toUpperCase()}`);
+        logger.error(error, `JOB-FAILED-${jobId}`);
         appInsights.defaultClient.trackException({
             exception: error,
             properties: {
-                name: `JOB-FAILED-${name.toUpperCase()}`,
-                job: name,
+                name: `JOB-FAILED-${jobId}`,
+                id: jobId,
                 message: response.body.message,
                 result: response.body.data,
             },
