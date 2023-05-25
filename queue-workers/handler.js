@@ -8,6 +8,7 @@ appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 module.exports = async function (message, context) {
     const { name, data } = message;
     const { body, bot_token } = data;
+
     
     try {
         const workerBot = createTelegramBot(bot_token);
@@ -15,26 +16,28 @@ module.exports = async function (message, context) {
         const response = await service(body, workerBot);
 
         if (response.status === 200) {
-            logger.info(response.data, `JOB-COMPLETED-${body.id}`);
+            logger.info(response.data, `JOB-COMPLETED-${name.toUpperCase()}`);
             logger.flush();
 
             appInsights.defaultClient.trackEvent({
                 name: 'Job completed',
                 properties: {
-                  jobId: job.id,
-                  result: job.returnvalue,
+                    job: name,
+                  message: response.body.message,
+                  result: response.body.data,
                 },
               });
         }
         return response;
     } catch (error) {
         console.log(error);
-        logger.error(error, `JOB-FAILED-${body.id}`);
+        logger.error(error, `JOB-FAILED-${name.toUpperCase()}`);
         appInsights.defaultClient.trackException({
             exception: error,
             properties: {
-              jobId: job.id,
-              jobData: job.data,
+                job: name,
+                message: response.body.message,
+                result: response.body.data,
             },
         });
         
