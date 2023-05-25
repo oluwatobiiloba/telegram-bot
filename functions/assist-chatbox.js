@@ -1,7 +1,6 @@
 const { app } = require('@azure/functions');
 const chatBox = require('../services/functions/chat-box');
 const createBot = require('../utils/createTelegramBot');
-const logger = require('../utils/logger');
 
 const { ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK } = process.env;
 const bot = createBot(ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK);
