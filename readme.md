@@ -1,5 +1,7 @@
 # Maya - An AI Chatbot with Telegram Integration and Document Editing Capabilities.
 
+[![Build and deploy Node.js project to Azure Function App - Maya-assist-bot](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/deploy_maya.yml/badge.svg)](https://github.com/oluwatobiiloba/telegram-bot/actions/workflows/deploy_maya.yml)
+
 Maya is an intelligent chatbot that integrates with OpenAI's GPT-3, Dall-E, and 3.5-turbo models to generate human-like responses and images to user queries. The app is hosted on Azure Functions and stores chat history on Cosmos DB.
 
 In addition to the original features, Maya now offers document editing capabilities using **Azure Blob Services** and **bullmq**. Users can send their documents or resumes to Maya for improvements, and the bot will respond with a link to the improved PDF file. With bullmq, time-consuming tasks such as resume rewrites, and cover letter generation can be done more efficiently, making responses and performance better.
