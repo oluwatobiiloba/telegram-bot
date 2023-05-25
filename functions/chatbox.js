@@ -10,3 +10,4 @@ app.http('chatbox', {
   authLevel: 'anonymous',
   handler: (request) => chatBox(request, bot),
 });
+

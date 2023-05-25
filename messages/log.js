@@ -20,6 +20,7 @@ module.exports = {
   NO_CHAT_ID: 'Could not get ChatID',
   NO_AI_RESPONSE: 'No response gotten from AI',
   NO_DOCUMENT_FOUND: 'Could not get file document',
+  NO_MESSAGE_FOUND: 'No data/name found',
   getFileUploadSuccess: (fileId) => `File Upload Successful. Id: ${fileId}`,
   getConvoStarted: (chatId) => `Conversation started with id - ${chatId}`,
   getHelpMessageSent: (chatId) => `Help message sent to id - ${chatId}`,

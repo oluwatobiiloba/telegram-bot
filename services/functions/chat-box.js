@@ -1,4 +1,4 @@
-const docQueue = require('../../queue-workers/queue');
+const docQueue = require('../../queue-workers/azure-queue-worker/queue');
 const resUtil = require('../../utils/res-util');
 const { logMsgs, dynamicBotMsgs } = require('../../messages');
 const { DOC_REGEX, JOB_PROCESS_DOC } = require('../../utils/constants');
@@ -9,17 +9,18 @@ async function service(request, bot) {
   try {
     const body = await request.json();
     const prompt = body.message?.text;
+    const botToken = bot.token;
 
     let response;
 
     if (DOC_REGEX.test(prompt?.substring(0, 50))) {
-      const job = await docQueue.add(JOB_PROCESS_DOC, { body, bot });
+      const jobId = await docQueue.sendMessage(JOB_PROCESS_DOC, { body, botToken });
 
-      await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(job.id));
+      await bot.sendMessage(body.message.chat.id, dynamicBotMsgs.getJobInProgress(jobId));
 
       response = resUtil.success(logMsgs.JOB_QUEUED);
 
-      logger.info(response, `JOB-QUEUED-${job.id}`);
+      logger.info(response, `JOB-QUEUED-${jobId}`);
     } else {
       response = await promptHandler(body, bot);
       logger.info(response, `CHAT-BOX-${Date.now()}`);
