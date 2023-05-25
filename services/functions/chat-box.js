@@ -20,7 +20,7 @@ async function service(request, bot) {
 
       response = resUtil.success(logMsgs.JOB_QUEUED);
 
-      logger.info(response, `JOB-QUEUED-${job.id}`);
+      logger.info(response, `JOB-QUEUED-${jobId}`);
     } else {
       response = await promptHandler(body, bot);
       logger.info(response, `CHAT-BOX-${Date.now()}`);
