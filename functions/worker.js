@@ -1,5 +1,4 @@
 const { app } = require('@azure/functions');
-const logger = require('../utils/logger');
 const handler = require('../queue-workers/handler');
 
 
