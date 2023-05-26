@@ -49,6 +49,8 @@ module.exports = async function (body, bot) {
       case '/start':
         logger.info(logMsgs.getConvoStarted(chatId), LOG_KEY);
 
+        await chatDao.createHistory(chatId)
+
         await bot.sendMessage(chatId, staticBotMsgs.START_CHAT);
 
         return resUtil.success(logMsgs.getConvoStarted(chatId));

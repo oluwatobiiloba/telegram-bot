@@ -2,8 +2,10 @@ const { staticBotMsgs, promptMsgs, logMsgs, dynamicBotMsgs } = require('../../me
 const aiDao = require('../../daos/open-AI');
 const chatDao = require('../../daos/chat-history');
 const musicDao = require('../../daos/spotify');
+const authDao = require('../../daos/auth')
 const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
+const { decryptRefreshToken } = require('../../utils/encryption')
 const TimeLogger = require('../../utils/timelogger');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
@@ -40,7 +42,16 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     timeLogger.start('getting-access-token');
 
-    const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
+    const userAuth = await authDao.getAuth(chatId)
+
+    if (!userAuth || !userAuth.spotify) {
+      REFRESH_TOKEN = process.env.REFRESH_TOKEN
+    } else {
+      const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
+      REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
+    }
+
+    const accessToken = await musicDao.getAccessToken(REFRESH_TOKEN);
 
     timeLogger.end('getting-access-token');
 
