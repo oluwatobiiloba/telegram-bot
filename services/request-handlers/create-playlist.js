@@ -7,18 +7,19 @@ const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
 const { decryptRefreshToken } = require('../../utils/encryption')
 const TimeLogger = require('../../utils/timelogger');
-const { app } = require('@azure/functions');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
+
   const timeLogger = new TimeLogger(`CREATE-PLAYLIST-DURATION-${Date.now()}`);
 
   let REFRESH_TOKEN = null;
   let funcResponse;
   const chatLog = [{ role: 'user', content: prompt }];
 
-
   try {
     const userAuth = await authDao.getAuth(chatId)
+
+    timeLogger.start('getting-user-auth');
 
     if (!userAuth || !userAuth.spotify) {
       await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
@@ -29,6 +30,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
       REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
     }
+    
+    timeLogger.end('getting-user-auth');
 
     timeLogger.start('getting-access-token');
 

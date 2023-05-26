@@ -1,14 +1,19 @@
 const querystring = require('querystring');
-const crypto = require('crypto');
 const axios = require('axios');
 const encrytion = require('../utils/encryption');
 const authDao = require("../daos/auth");
 const jwt = require('jsonwebtoken');
 const azureQueue = require('../queue-workers/azure-queue-worker/queue');
+const logger = require('../utils/logger');
+const TimeLogger = require('../utils/timelogger');
 
-const { SCOPES, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI , ENCRYPTION_KEY } = process.env
+
+const {  CLIENT_ID, CLIENT_SECRET, REDIRECT_URI , ENCRYPTION_KEY } = process.env
 
 module.exports = async function (req, context) {
+
+    const timeLogger = new TimeLogger(`SPOTIFY-CALLBACK-DURATION-${Date.now()}`);
+
     const code = req.query.get('code') || null;
     const state = req.query.get('state') || null;
     const error = req.query.get('error') || null;
@@ -28,17 +33,21 @@ module.exports = async function (req, context) {
         };
     }
 
-
+    logger.info(`Retrieving access token for spotify`, 'spotify-callback')
     try {
+        timeLogger.start('decrypt-user-id')
         const { iv, encryptedToken } = jwt.verify(state, ENCRYPTION_KEY)
 
         const retrieved_id = encrytion.decryptRefreshToken(encryptedToken, iv) 
+
+        timeLogger.end('decrypt-user-id')
         
         if (!retrieved_id) return {
             status: 400,
             body: `Invalid User ID`
         }
         const checkUser = await authDao.checkUser(retrieved_id)
+        
     
         if (!checkUser.exists) return {
             status: 400,
@@ -58,11 +67,13 @@ module.exports = async function (req, context) {
             }
         };
 
+        timeLogger.start('retrieve-access-token')
         const tokenRes = await axios.post(tokenEndpoint, tokenParams, tokenConfig);
-
 
         const hashedToken = encrytion.encryptRefreshToken(tokenRes.data.access_token)
         const hashedRefreshToken = encrytion.encryptRefreshToken(tokenRes.data.refresh_token)
+
+        timeLogger.end('retrieve-access-token')
         
         const auth = {
             spotify: {
@@ -72,6 +83,8 @@ module.exports = async function (req, context) {
         }
 
         await authDao.updateAuth(retrieved_id, auth)
+
+        timeLogger.start('process-suspended-playlist-generation')
 
         if (checkUser.resource.suspendedJob) {
             let data = {
@@ -84,12 +97,15 @@ module.exports = async function (req, context) {
            await azureQueue.sendMessage("process-suspended-playlist-generation", data)
         }
 
+        timeLogger.end('process-suspended-playlist-generation')
+
         return {
             status: 200,
             body: 'Authorization successful!'
           };
     } catch (err) {
-        console.error(`Failed to retrieve access token: ${err.message}`);
+        //console.error(`Failed to retrieve access token: ${err.message}`);
+        logger.error(`Failed to retrieve access token: ${err.message}`, 'spotify-callback')
        return {
             status: 400,
             body: 'Authorization failed.'
