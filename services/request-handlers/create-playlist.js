@@ -14,6 +14,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
   let REFRESH_TOKEN = null;
   let funcResponse;
+  const chatLog = [{ role: 'user', content: prompt }];
+
 
   try {
     const userAuth = await authDao.getAuth(chatId)
@@ -28,7 +30,24 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
     }
 
-    const chatLog = [{ role: 'user', content: prompt }];
+    timeLogger.start('getting-access-token');
+
+    const accessToken = await musicDao.getAccessToken(REFRESH_TOKEN);
+
+    timeLogger.end('getting-access-token');
+
+    if (accessToken) {
+      timeLogger.start('checking-user-access');
+
+      const userProfile = await musicDao.getUserProfile(accessToken);
+
+      const user = {
+        id: userProfile.id,
+        username: body.message?.from?.first_name,
+      };
+
+     timeLogger.end('checking-user-access');
+      
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
 
@@ -48,6 +67,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
     }
 
     const aiReply = choices[0]?.message?.content;
+      
+    chatLog.push({ role: 'assistant', content: aiReply });
 
     let songList = aiReply.substring(aiReply.indexOf('['), aiReply.lastIndexOf(']') + 1);
 
@@ -55,25 +76,10 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     logger.info({ prompt: playlistMessage, aiResponse: songList}, `CREATE-PLAYLIST-${Date.now()}`);
 
-    timeLogger.start('getting-access-token');
-
-    const accessToken = await musicDao.getAccessToken(REFRESH_TOKEN);
-
-    timeLogger.end('getting-access-token');
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
-    if (accessToken) {
-      const userProfile = await musicDao.getUserProfile(accessToken);
-      const user = {
-        id: userProfile.id,
-        username: body.message?.from?.first_name,
-      };
-
       timeLogger.start('creating-playlist');
-      
-      const appAccessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN)
-
 
       const playlist = await musicDao.createPlaylist(songList,  accessToken , { user }, );
 
@@ -91,8 +97,6 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       funcResponse = resUtil.success(logMsgs.NO_PLAYLIST_GENERATED);
     }
 
-    chatLog.push({ role: 'assistant', content: aiReply });
-
     timeLogger.start('updating-chat-history');
 
     await chatDao.updateHistory(chatId, chatLog);
@@ -101,8 +105,12 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     return funcResponse;
   } catch (err) {
-    await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
-
+    if (err.message === 'User not registered in the Developer Dashboard') { 
+      await bot.sendMessage(chatId, `You are not enabled for this beta test. Kindly contact the developer to grant you access`)
+    } else {
+      await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
+    }
+    
     err.message = `CREATE-PLAYLIST-REQ-HANDLER: ${err.message}`;
 
     throw err;
