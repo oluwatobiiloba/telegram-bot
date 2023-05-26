@@ -1,13 +1,13 @@
 const { auth } = require('../containers');
 
 module.exports = {
-  async createAuth(id, authParams = {}) {
+  async createAuth(id, authParams = {}, suspendedJob) {
     
     const idStr = id.toString();
     const { resource } = await auth.get(idStr)
 
-    if (!resource) return auth.create(idStr, authParams);
-    
+    if (!resource) return auth.create(idStr, authParams,suspendedJob);
+
     return resource
 
   },
@@ -43,8 +43,13 @@ module.exports = {
 
     const { resource } = await auth.get(idStr);
 
-    if (!resource) return false
+    if (!resource) return {
+      exists: false
+    }
 
-    return true
+    return {
+      exists: true,
+      resource
+    }
   }
 };

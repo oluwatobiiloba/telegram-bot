@@ -4,6 +4,7 @@ const axios = require('axios');
 const encrytion = require('../utils/encryption');
 const authDao = require("../daos/auth");
 const jwt = require('jsonwebtoken');
+const azureQueue = require('../queue-workers/azure-queue-worker/queue');
 
 const { SCOPES, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI , ENCRYPTION_KEY } = process.env
 
@@ -39,7 +40,7 @@ module.exports = async function (req, context) {
         }
         const checkUser = await authDao.checkUser(retrieved_id)
     
-        if (!checkUser) return {
+        if (!checkUser.exists) return {
             status: 400,
             body: `User does not exist.`
         }
@@ -71,6 +72,10 @@ module.exports = async function (req, context) {
         }
 
         await authDao.updateAuth(retrieved_id, auth)
+
+        if (checkUser.resource.suspendedJob) {
+           await azureQueue.sendMessage("process-suspended-playlist-generation", checkUser.resource.suspendedJob)
+        }
 
         return {
             status: 200,

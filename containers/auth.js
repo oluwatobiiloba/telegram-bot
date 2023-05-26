@@ -1,10 +1,11 @@
 function container(model) {
     return {
-      create(id, auth) {
+      create(id, auth, suspendedJob) {
         return model.items.create({
           id: id,
           partitionKey: id,
-            auth
+          auth,
+            suspendedJob
         });
       },
       get(id) {

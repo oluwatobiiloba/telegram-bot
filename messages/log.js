@@ -9,6 +9,7 @@ module.exports = {
   INVALID_FILE_FORMAT: 'Invalid file format received',
   API_REQ_ERROR: 'Error Fetching Data From Network',
   NO_PLAYLIST_GENERATED: 'No songs recommended.',
+  NO_SPOTIFY_ACCOUNT_LINKED: 'User has no Spotify account linked',
   PROMPT_REPLY_SENT: 'Message Sent',
   IMG_GENERATED: 'Image Generated',
   PLAYLIST_GENERATED: 'Playlist Created',
