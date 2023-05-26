@@ -7,12 +7,27 @@ const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
 const { decryptRefreshToken } = require('../../utils/encryption')
 const TimeLogger = require('../../utils/timelogger');
+const { app } = require('@azure/functions');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
   const timeLogger = new TimeLogger(`CREATE-PLAYLIST-DURATION-${Date.now()}`);
 
+  let REFRESH_TOKEN = null;
+  let funcResponse;
+
   try {
-    let funcResponse;
+    const userAuth = await authDao.getAuth(chatId)
+
+    if (!userAuth || !userAuth.spotify) {
+      await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
+      const suspendedJobData = { prompt, chatId, bot, body }
+      await authDao.createAuth(chatId, null , suspendedJobData )
+      return funcResponse = resUtil.success(logMsgs.NO_SPOTIFY_ACCOUNT_LINKED);
+    } else {
+      const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
+      REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
+    }
+
     const chatLog = [{ role: 'user', content: prompt }];
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
@@ -42,18 +57,6 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     timeLogger.start('getting-access-token');
 
-    const userAuth = await authDao.getAuth(chatId)
-
-    if (!userAuth || !userAuth.spotify) {
-      await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
-      const suspendedJobData = { prompt, chatId, bot, body }
-      await authDao.createAuth(chatId, null , suspendedJobData )
-      return funcResponse = resUtil.success(logMsgs.NO_SPOTIFY_ACCOUNT_LINKED);
-    } else {
-      const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
-      REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
-    }
-
     const accessToken = await musicDao.getAccessToken(REFRESH_TOKEN);
 
     timeLogger.end('getting-access-token');
@@ -61,14 +64,18 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
     if (accessToken) {
+      const userProfile = await musicDao.getUserProfile(accessToken);
       const user = {
-        id: process.env.SPOTIFY_USER_ID,
+        id: userProfile.id,
         username: body.message?.from?.first_name,
       };
 
       timeLogger.start('creating-playlist');
+      
+      const appAccessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN)
 
-      const playlist = await musicDao.createPlaylist(songList, accessToken, { user });
+
+      const playlist = await musicDao.createPlaylist(songList,  accessToken , { user }, );
 
       timeLogger.start('creating-playlist');
 

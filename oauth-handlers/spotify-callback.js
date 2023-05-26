@@ -74,7 +74,14 @@ module.exports = async function (req, context) {
         await authDao.updateAuth(retrieved_id, auth)
 
         if (checkUser.resource.suspendedJob) {
-           await azureQueue.sendMessage("process-suspended-playlist-generation", checkUser.resource.suspendedJob)
+            let data = {
+                body: checkUser.resource.suspendedJob.body,
+                botToken: checkUser.resource.suspendedJob.bot.token
+
+            }
+
+            data.body.chatId = checkUser.resource.suspendedJob.chatId
+           await azureQueue.sendMessage("process-suspended-playlist-generation", data)
         }
 
         return {

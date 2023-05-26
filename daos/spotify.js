@@ -124,12 +124,28 @@ module.exports = {
         method: 'post',
         data: qs.stringify(form),
         headers,
+        json: true
       });
 
       return response.data.access_token;
     } catch (err) {
       throw APIError(err);
     }
+  },
+  
+  async getUserProfile(accessToken) { 
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+    const response = await axios({
+      url: 'https://api.spotify.com/v1/me',
+      method: 'get',
+      headers,
+    });
+
+    return response.data;
+
   },
 
   async createPlaylist(songList, accessToken, config) {
