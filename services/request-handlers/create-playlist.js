@@ -22,9 +22,9 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
     timeLogger.start('getting-user-auth');
 
     if (!userAuth || !userAuth.spotify) {
-      await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
       const suspendedJobData = { prompt, chatId, bot, body }
-      await authDao.createAuth(chatId, null , suspendedJobData )
+      await authDao.createAuth(chatId, null, suspendedJobData)
+      await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
       return funcResponse = resUtil.success(logMsgs.NO_SPOTIFY_ACCOUNT_LINKED);
     } else {
       const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
