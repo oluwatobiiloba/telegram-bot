@@ -10,9 +10,10 @@ module.exports = async function (message, context) {
     const jobId = context.triggerMetadata.id
     try {
         const workerBot = createTelegramBot(botToken);
+      
         const service = require(`../../services/worker/${name}`);
+        
         const response = await service(body, workerBot);
-
 
         if (response.status === 200) {
             logger.info(response.body, `JOB-COMPLETED-${jobId}`);
@@ -28,7 +29,7 @@ module.exports = async function (message, context) {
         }
         return response;
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         logger.error(error, `JOB-FAILED-${jobId}`);
         appInsights.defaultClient.trackException({
             exception: error,
@@ -36,7 +37,7 @@ module.exports = async function (message, context) {
                 name: `JOB-FAILED-${jobId}`,
                 id: jobId,
                 message: error.message,
-                error,
+                error: error.stack,
             },
         });
         

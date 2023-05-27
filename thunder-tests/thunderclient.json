@@ -8,12 +8,12 @@
     "method": "POST",
     "sortNum": 10000,
     "created": "2023-05-25T07:03:06.056Z",
-    "modified": "2023-05-25T07:03:06.056Z",
+    "modified": "2023-05-26T21:38:14.167Z",
     "headers": [],
     "params": [],
     "body": {
       "type": "json",
-      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"/resume 74473e9b7efd1ad5d21612af7c4a807c help write a cover letter for my application to google \"\n  }\n}",
+      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"https://music.apple.com/ng/playlist/2020/pl.u-aZb0kW4C1zAl32J\"\n  }\n}",
       "form": []
     },
     "tests": []

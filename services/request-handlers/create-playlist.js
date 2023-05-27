@@ -2,16 +2,55 @@ const { staticBotMsgs, promptMsgs, logMsgs, dynamicBotMsgs } = require('../../me
 const aiDao = require('../../daos/open-AI');
 const chatDao = require('../../daos/chat-history');
 const musicDao = require('../../daos/spotify');
+const authDao = require('../../daos/auth')
 const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
+const { decryptRefreshToken } = require('../../utils/encryption')
 const TimeLogger = require('../../utils/timelogger');
 
 module.exports = async function ({ prompt, chatId, bot, body }) {
+
   const timeLogger = new TimeLogger(`CREATE-PLAYLIST-DURATION-${Date.now()}`);
 
+  let REFRESH_TOKEN = null;
+  let funcResponse;
+  const chatLog = [{ role: 'user', content: prompt }];
+
   try {
-    let funcResponse;
-    const chatLog = [{ role: 'user', content: prompt }];
+    const userAuth = await authDao.getAuth(chatId)
+
+    timeLogger.start('getting-user-auth');
+
+    if (!userAuth || !userAuth.spotify) {
+      const suspendedJobData = { prompt, chatId, bot, body }
+      await authDao.createAuth(chatId, null, suspendedJobData)
+      await bot.sendMessage(chatId, `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: http://localhost:7071/api/spotify?chat_id=${chatId}`);
+      return funcResponse = resUtil.success(logMsgs.NO_SPOTIFY_ACCOUNT_LINKED);
+    } else {
+      const {spotify: { hashedRefreshToken : { iv , encryptedToken}  }} = userAuth
+      REFRESH_TOKEN = decryptRefreshToken(encryptedToken, iv)
+    }
+    
+    timeLogger.end('getting-user-auth');
+
+    timeLogger.start('getting-access-token');
+
+    const accessToken = await musicDao.getAccessToken(REFRESH_TOKEN);
+
+    timeLogger.end('getting-access-token');
+
+    if (accessToken) {
+      timeLogger.start('checking-user-access');
+
+      const userProfile = await musicDao.getUserProfile(accessToken);
+
+      const user = {
+        id: userProfile.id,
+        username: body.message?.from?.first_name,
+      };
+
+     timeLogger.end('checking-user-access');
+      
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
 
@@ -31,6 +70,8 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
     }
 
     const aiReply = choices[0]?.message?.content;
+      
+    chatLog.push({ role: 'assistant', content: aiReply });
 
     let songList = aiReply.substring(aiReply.indexOf('['), aiReply.lastIndexOf(']') + 1);
 
@@ -38,23 +79,12 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     logger.info({ prompt: playlistMessage, aiResponse: songList}, `CREATE-PLAYLIST-${Date.now()}`);
 
-    timeLogger.start('getting-access-token');
-
-    const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
-
-    timeLogger.end('getting-access-token');
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
-    if (accessToken) {
-      const user = {
-        id: process.env.SPOTIFY_USER_ID,
-        username: body.message?.from?.first_name,
-      };
-
       timeLogger.start('creating-playlist');
 
-      const playlist = await musicDao.createPlaylist(songList, accessToken, { user });
+      const playlist = await musicDao.createPlaylist(songList,  accessToken , { user }, );
 
       timeLogger.start('creating-playlist');
 
@@ -70,8 +100,6 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       funcResponse = resUtil.success(logMsgs.NO_PLAYLIST_GENERATED);
     }
 
-    chatLog.push({ role: 'assistant', content: aiReply });
-
     timeLogger.start('updating-chat-history');
 
     await chatDao.updateHistory(chatId, chatLog);
@@ -80,8 +108,12 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     return funcResponse;
   } catch (err) {
-    await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
-
+    if (err.message === 'User not registered in the Developer Dashboard') { 
+      await bot.sendMessage(chatId, `You are not enabled for this beta test. Kindly contact the developer to grant you access`)
+    } else {
+      await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
+    }
+    
     err.message = `CREATE-PLAYLIST-REQ-HANDLER: ${err.message}`;
 
     throw err;

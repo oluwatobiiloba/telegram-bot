@@ -105,3 +105,5 @@ __azurite_db*__.json
 .DS_Store
 
 playground.js
+thunder-tests/thunderActivity.json
+thunder-tests/thunderclient.json

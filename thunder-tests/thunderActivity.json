@@ -27,13 +27,55 @@
     "method": "POST",
     "sortNum": 0,
     "created": "2023-05-23T21:25:45.523Z",
-    "modified": "2023-05-24T20:22:54.122Z",
+    "modified": "2023-05-26T16:08:12.884Z",
     "headers": [],
     "params": [],
     "body": {
       "type": "json",
-      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"/resume 74473e9b7efd1ad5d21612af7c4a807c help write a cover letter for my application to google \"\n  }\n}",
+      "raw": "{\n  \"update_id\": 775918174,\n  \"message\": {\n    \"message_id\": 4226,\n    \"from\": {\n      \"id\": 1067702748,\n      \"is_bot\": false,\n      \"first_name\": \"Tobii\",\n      \"language_code\": \"en\"\n    },\n    \"chat\": {\n      \"id\": 1067702748,\n      \"first_name\": \"Tobii\",\n      \"type\": \"private\"\n    },\n    \"date\": 1684753163,\n    \"text\": \"Create a playlist for me. I'm about to go on long walk to clear my head. I need songs that'll help improve my mood with artists like jcole and pharell\"\n  }\n}",
       "form": []
+    },
+    "tests": []
+  },
+  {
+    "_id": "4dcac661-5670-4cd6-93f7-455e674d4bac",
+    "colId": "history",
+    "containerId": "",
+    "name": "https://api.spotify.com/v1/search?q=",
+    "url": "https://api.spotify.com/v1/search?q=",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2023-05-26T17:33:30.687Z",
+    "modified": "2023-05-26T17:33:30.687Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "q",
+        "value": "",
+        "isPath": false
+      }
+    ],
+    "auth": {
+      "type": "bearer",
+      "bearer": "BQCiQH4Dvv_Sl66K5InR4f-h2FoAVj8-wy3nl6H3S-XpR4LTgweMCEmawRHrVj_8dfwcCP6MaWuUlyD0HkZPk1O-0AAZ5unJldP42SKrjzUM-uz9Mr_m6lFhn6G2KGYws3IbSSokYKSN4BZnBCGpbAJZgnejJe7uhkorTQhkeg6Bx9KRM_d2ggpfZsQD68Hxt80fIRruZmgIyF9tEet7TyXJx1oV1i8XO-CChREXcMyL0WwOyWolEobuC0aX0-d666-klHYk"
+    },
+    "tests": []
+  },
+  {
+    "_id": "fa5958e5-7697-46e8-92bb-17d5663b0c33",
+    "colId": "history",
+    "containerId": "",
+    "name": "https://api.spotify.com/v1/me",
+    "url": "https://api.spotify.com/v1/me",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2023-05-26T17:35:32.400Z",
+    "modified": "2023-05-26T18:49:48.225Z",
+    "headers": [],
+    "params": [],
+    "auth": {
+      "type": "bearer",
+      "bearer": "Bearer"
     },
     "tests": []
   }
