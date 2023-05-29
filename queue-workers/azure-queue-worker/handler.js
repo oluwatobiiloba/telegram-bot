@@ -6,12 +6,12 @@ appInsights.setup(process.env.APPINSIGHTS_CONNECTIONSTRING).start();
 
 
 module.exports = async function (message, context) {
-    const { name, data: { body, botToken } } = message;
+    const { name, data } = message;
     const jobId = context.triggerMetadata.id
     try {
-        const workerBot = createTelegramBot(botToken);
+        const workerBot = createTelegramBot(data.botToken);
         const service = require(`../../services/worker/${name}`);
-        const response = await service(body, workerBot);
+        const response = await service(data, workerBot);
 
 
         if (response.status === 200) {
@@ -36,7 +36,7 @@ module.exports = async function (message, context) {
                 name: `JOB-FAILED-${jobId}`,
                 id: jobId,
                 message: error.message,
-                error,
+                error: error.stack,
             },
         });
         

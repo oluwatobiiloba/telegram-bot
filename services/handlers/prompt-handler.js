@@ -5,6 +5,9 @@ const resUtil = require('../../utils/res-util');
 const promptMapper = require('../../utils/prompt-mapper');
 const TimeLogger = require('../../utils/timelogger');
 const logger = require('../../utils/logger');
+const middlewareHandler = require('./middleware-handler');
+const userDao = require('../../daos/user');
+const md5 = require('md5');
 
 module.exports = async function (body, bot) {
   const timeLogger = new TimeLogger(`PROMPT-HANDLER-DURATION-${Date.now()}`);
@@ -48,6 +51,15 @@ module.exports = async function (body, bot) {
 
       case '/start':
         logger.info(logMsgs.getConvoStarted(chatId), LOG_KEY);
+        // get user if none then create one
+        const userId = md5(String(chatId));
+
+        await userDao.findOrCreateUser(userId, {
+          name: body.message?.from?.first_name || 'Mayan',
+          chatId,
+        });
+
+        await chatDao.getHistory(chatId);
 
         await bot.sendMessage(chatId, staticBotMsgs.START_CHAT);
 
@@ -56,18 +68,29 @@ module.exports = async function (body, bot) {
       case '/help':
         logger.info(logMsgs.getHelpMessageSent(chatId), LOG_KEY);
 
-        await bot.sendMessage(chatId, help_text.help);
+        await bot.sendMessage(chatId, staticBotMsgs.HELP);
 
         return resUtil.success(logMsgs.getHelpMessageSent(chatId));
     }
+    const reqArgs = { prompt, chatId, bot, body };
 
     const handler = promptMapper(prompt);
 
     const handlerFunc = require(`../request-handlers/${handler}`);
 
+    timeLogger.start(`running-${handler}-middlewares`);
+    if (handlerFunc.middlewares?.length) {
+      reqArgs.handler = handler;
+
+      await middlewareHandler(handlerFunc.middlewares, reqArgs);
+    }
+    timeLogger.end(`running-${handler}-middlewares`);
+
+    delete reqArgs.handler;
+
     timeLogger.start(`running-${handler}-function`);
 
-    const funcRes = await handlerFunc({ prompt, chatId, bot, body });
+    const funcRes = await handlerFunc(reqArgs);
 
     timeLogger.end(`running-${handler}-function`);
 

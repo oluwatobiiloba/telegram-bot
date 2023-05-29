@@ -12,4 +12,6 @@ module.exports = {
   Example:
   /resume BQACAgQAAxkBA I want to apply for a junior designer role ....`,
   getPlaylistGenerated: (url) => `Here's your playlist 🤖, as promised : ${url}.`,
+  getSpotifyAuth: (id) =>
+    `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}`,
 };

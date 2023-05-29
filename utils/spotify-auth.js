@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const querystring = require('querystring');
+const qs = require('qs');
 const crypto = require('crypto');
 
 const state = crypto.randomBytes(20).toString('hex');
@@ -16,7 +16,7 @@ const SCOPES = 'playlist-modify-public playlist-modify-private ugc-image-upload 
 // Step 1: Redirect the user to the Spotify authorization page
 app.get('/login', (req, res) => {
     const authEndpoint = 'https://accounts.spotify.com/authorize';
-    const params = querystring.stringify({
+    const params = qs.stringify({
         response_type: 'code',
         client_id: CLIENT_ID,
         scope: SCOPES,
@@ -49,7 +49,7 @@ app.get('/callback', async (req, res) => {
 
     try {
         const tokenEndpoint = 'https://accounts.spotify.com/api/token';
-        const tokenParams = querystring.stringify({
+        const tokenParams = qs.stringify({
             grant_type: 'authorization_code',
             code: code,
             redirect_uri: REDIRECT_URI
