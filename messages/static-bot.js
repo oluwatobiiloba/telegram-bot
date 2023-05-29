@@ -1,6 +1,6 @@
 module.exports = {
   CLEAR_HISTORY: 'Chat history cleared',
-  START_CHAT: `Hi, I'm Chat Assist Bot. I can help you with your daily tasks. You can ask me to create an image, create spotify playlists,optimize documents/resumes ,search for a movie, or even get the weather forecast. I can also help you with your homework. Just reply with /help to see all the commands I can do. Please note that chats are stored until you clear them using /clear command.`,
+  START_CHAT: `Hi, I'm Chat Assist Bot.\nI can help you with your daily tasks.\nYou can ask me to create an image, create spotify playlists,optimize documents/resumes ,search for a movie, or even get the weather forecast.I can also help you with your homework.\nJust reply with /help to see all the commands I can do.\nPlease note that chats are stored until you clear them using /clear command.`,
   HELP: `Hi, simply ask any questions and I will try to answer them.  I can also do the following:
     Conversations: You can ask me to start a conversation by asking texting "hey" or "hi" or other greetings.
     Create an Image : You can also ask me to create an image by asking me to create an image of a <your image prompt here>. 
@@ -34,4 +34,10 @@ module.exports = {
   ],
   ERROR_GEN_PLAYLIST:
     "I'm sorry, I ruined your playlist 😢. Please try again in a minute while I gather my thoughts 😿.",
+  RESTART_CHAT: "Apologies, I lost my messages 😿.\nPlease can you send /start or clear the chat history?\nThis will help me gather my thoughts",
+  CALLBACK_AUTH_MSGS: [
+    'Confirming Identity....',
+    'Linking Account....',
+    'Linking Successful... Gathering thoughts...'
+  ]
 };

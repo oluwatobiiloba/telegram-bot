@@ -4,10 +4,9 @@ const aiDao = require('../../daos/open-AI');
 const documentProcessor = require('../../utils/document-processor');
 const { logMsgs, staticBotMsgs, dynamicBotMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
-const logger = require('../../utils/logger');
 const TimeLogger = require('../../utils/timelogger');
 
-async function service(body, bot) {
+async function service({ body }, bot) {
   const message = body.message?.text;
   const chatId = body.message?.chat?.id;
 

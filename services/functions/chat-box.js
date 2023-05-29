@@ -30,7 +30,7 @@ async function service(request, bot) {
   } catch (error) {
     // console.log(error);
 
-    logger.error(error, 'CHAT-BOX-ERROR');
+    logger.error(error, `CHAT-BOX-ERROR-${Date.now()}`);
 
     return resUtil.error(200, error);
   } finally {

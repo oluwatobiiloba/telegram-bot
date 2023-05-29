@@ -1,3 +1,4 @@
+const md5 = require('md5');
 const playlistConverter = require('../../daos/playlist-converter');
 const musicDao = require('../../daos/spotify');
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require('../../messages');
@@ -5,7 +6,7 @@ const { APPLE_REGEX } = require('../../utils/constants');
 const resUtil = require('../../utils/res-util');
 const TimeLogger = require('../../utils/timelogger');
 
-module.exports = async function ({ prompt, chatId, bot, body }) {
+async function handler({ prompt, chatId, bot, body }) {
   const appleUrl = prompt.match(APPLE_REGEX)[0];
 
   const timeLogger = new TimeLogger(`CONVERT-APPLE-PLAYLIST-DURATION-${Date.now()}`);
@@ -25,18 +26,20 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[1]);
 
-    timeLogger.start('getting-access-token');
+    // timeLogger.start('getting-access-token');
 
-    const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
+    // const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
 
-    timeLogger.end('getting-access-token');
+    // timeLogger.end('getting-access-token');
 
-    await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
+    //await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
-    if (accessToken) {
+    const { name, spotifyTokens } = body.user;
+
+    if (spotifyTokens) {
       const user = {
-        id: process.env.SPOTIFY_USER_ID,
-        username: body.message?.from?.first_name,
+        id: spotifyTokens.id,
+        username: name,
       };
 
       const config = {
@@ -49,7 +52,7 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       };
       timeLogger.start('creating-playlist');
 
-      const playlistURL = await musicDao.createPlaylist(tracks, accessToken, config);
+      const playlistURL = await musicDao.createPlaylist(tracks, spotifyTokens.accessToken, config);
 
       timeLogger.end('creating-playlist');
 
@@ -67,7 +70,7 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
       funcResponse = resUtil.success(logMsgs.NO_PLAYLIST_GENERATED);
     }
 
-    return funcResponse
+    return funcResponse;
   } catch (err) {
     await bot.sendMessage(chatId, staticBotMsgs.ERROR_GEN_PLAYLIST);
 
@@ -76,4 +79,7 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
   } finally {
     timeLogger.log();
   }
-};
+}
+
+handler.middlewares = ['spotifyauth'];
+module.exports = handler;

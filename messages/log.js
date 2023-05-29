@@ -1,6 +1,7 @@
 module.exports = {
   JOB_QUEUED: 'Job added to queue',
   INVALID_JOB_ID: 'Invalid document id provided.',
+  MISSING_JOB_DATA: 'Required job parameters are missing',
   INTERNAL_ERROR: 'Document received, but an internal error occurred while processing the request.',
   RESUME_PROCESSED: 'Resume received and processed.',
   REMOVED_FROM_GROUP: 'User kicked me out of the group',
@@ -21,8 +22,14 @@ module.exports = {
   NO_AI_RESPONSE: 'No response gotten from AI',
   NO_DOCUMENT_FOUND: 'Could not get file document',
   NO_MESSAGE_FOUND: 'No data/name found',
+  ID_IS_REQUIRED: 'Id is required',
+  NO_REFRESH_TOKEN: 'No refresh token found',
+  NO_ACCESS_TOKEN: 'No access token gotten from Spotify',
+  NO_PROFILE_ID_TOKEN: 'No profile Id gotten from Spotify',
+  NO_SPOTIFY_TOKENS: 'No tokens gotten from Spotify',
   getFileUploadSuccess: (fileId) => `File Upload Successful. Id: ${fileId}`,
   getConvoStarted: (chatId) => `Conversation started with id - ${chatId}`,
   getHelpMessageSent: (chatId) => `Help message sent to id - ${chatId}`,
   getImageGenFailed: (chatId) => `Could not generate images for id - ${chatId}`,
+  getInvalidUserId: (id) => `Invalid request id - ${id}`,
 };

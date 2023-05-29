@@ -6,7 +6,7 @@ const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
 const TimeLogger = require('../../utils/timelogger');
 
-module.exports = async function ({ prompt, chatId, bot, body }) {
+async function handler({ prompt, chatId, bot, body }) {
   const timeLogger = new TimeLogger(`CREATE-PLAYLIST-DURATION-${Date.now()}`);
 
   try {
@@ -36,25 +36,27 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
 
     songList = JSON.parse(songList);
 
-    logger.info({ prompt: playlistMessage, aiResponse: songList}, `CREATE-PLAYLIST-${Date.now()}`);
+    logger.info({ prompt: playlistMessage, aiResponse: songList }, `CREATE-PLAYLIST-${Date.now()}`);
 
-    timeLogger.start('getting-access-token');
+    // timeLogger.start('getting-access-token');
 
-    const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
+    // const accessToken = await musicDao.getAccessToken(process.env.REFRESH_TOKEN);
 
-    timeLogger.end('getting-access-token');
+    // timeLogger.end('getting-access-token');
 
-    await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
+    // await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[2]);
 
-    if (accessToken) {
+    const { name, spotifyTokens } = body.user;
+
+    if (spotifyTokens) {
       const user = {
-        id: process.env.SPOTIFY_USER_ID,
-        username: body.message?.from?.first_name,
+        id: spotifyTokens.id,
+        username: name,
       };
 
       timeLogger.start('creating-playlist');
 
-      const playlist = await musicDao.createPlaylist(songList, accessToken, { user });
+      const playlist = await musicDao.createPlaylist(songList, spotifyTokens.accessToken, { user });
 
       timeLogger.start('creating-playlist');
 
@@ -88,4 +90,7 @@ module.exports = async function ({ prompt, chatId, bot, body }) {
   } finally {
     timeLogger.log();
   }
-};
+}
+
+handler.middlewares = ['spotifyauth'];
+module.exports = handler;

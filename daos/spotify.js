@@ -3,9 +3,10 @@ const qs = require('qs');
 const { logMsgs } = require('../messages');
 const { APIError } = require('../utils/error-handler');
 const logger = require('../utils/logger');
-const { CLIENT_ID, CLIENT_SECRET } = process.env;
+const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } = process.env;
 
 const BASE_URL = 'https://api.spotify.com/v1';
+const ACCOUNT_BASE_URL = 'https://accounts.spotify.com/api/token';
 
 async function _getSongIds(songList, accessToken) {
   try {
@@ -23,6 +24,9 @@ async function _getSongIds(songList, accessToken) {
             return dataObj.tracks?.items;
           },
         ],
+        errorHandler: (err) => {
+          throw err;
+        },
       });
 
       const trackItems = response.data;
@@ -120,10 +124,11 @@ module.exports = {
       };
 
       const response = await axios({
-        url: 'https://accounts.spotify.com/api/token',
+        url: ACCOUNT_BASE_URL,
         method: 'post',
         data: qs.stringify(form),
         headers,
+        json: true,
       });
 
       return response.data.access_token;
@@ -167,6 +172,47 @@ module.exports = {
       }
 
       return playlistURL;
+    } catch (err) {
+      throw APIError(err);
+    }
+  },
+
+  async getUserProfile(accessToken) {
+    try {
+      const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+      
+      const response = await axios({
+        url: `${BASE_URL}/me`,
+        method: 'get',
+        headers,
+      });
+
+      return response.data;
+    } catch (error) {
+      throw APIError(error);
+    }
+  },
+
+  async getTokens(code) {
+    try {
+      const tokenParams = qs.stringify({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: REDIRECT_URI,
+      });
+      const tokenConfig = {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')}`,
+        },
+      };
+
+      const { data } = await axios.post(ACCOUNT_BASE_URL, tokenParams, tokenConfig);
+
+      return { accessToken: data.access_token, refreshToken: data.refresh_token };
     } catch (err) {
       throw APIError(err);
     }
