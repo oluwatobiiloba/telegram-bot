@@ -21,6 +21,7 @@
       "newBatchThreshold": 8,
       "messageEncoding": "none"
     }
+    
   },
   "concurrency": {
     "dynamicConcurrencyEnabled": true,
