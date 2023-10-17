@@ -10,7 +10,7 @@ module.exports = (prompt) => {
 
   if (APPLE_REGEX.test(prompt)) {
     handler = 'convert-apple-playlist';
-  } else if (YOUTUBE_REGEX.test(prompt?.substring(0, 50))) {
+  } else if (YOUTUBE_REGEX.test(prompt)) {
     handler = 'convert-download-youtube-video'
   } else {
     const lowerPrompt = prompt.toLowerCase();
