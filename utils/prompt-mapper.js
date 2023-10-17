@@ -11,7 +11,11 @@ module.exports = (prompt) => {
   if (APPLE_REGEX.test(prompt)) {
     handler = 'convert-apple-playlist';
   } else if (YOUTUBE_REGEX.test(prompt)) {
-    handler = 'convert-download-youtube-video'
+    if (prompt.includes("list=")) {
+      handler = 'convert-download-youtube-playlist'
+    } else {
+      handler = 'convert-download-youtube-video' 
+    }
   } else {
     const lowerPrompt = prompt.toLowerCase();
     for (let key of Object.keys(requestHandlerMapper)) {
