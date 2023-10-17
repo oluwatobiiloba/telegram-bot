@@ -23,13 +23,13 @@ async function handler({ prompt, chatId, bot, body }) {
                 videoFileStream.on('finish', resolve);
                 videoFileStream.on('error', reject);
             });
-           const videoReadStream = fs.createReadStream(tempFilePath);
+            const videoReadStream = fs.createReadStream(tempFilePath);
+            await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
            timeLogger.start("sending-video");
            await bot.sendVideo(chatId, videoReadStream, {}, {
                filename: videoInfo.title
            });
             timeLogger.end("sending-video");
-            await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.title);
             funcResponse = resUtil.success({
                 message: logMsgs.VIDEO_DOWNLOADED,
                 data: videoInfo.videoDetails.title,
