@@ -33,7 +33,6 @@ async function handler({ prompt, chatId, bot, body }) {
     } catch (err) {
         await bot.sendMessage(chatId, staticBotMsgs.ERROR_CON_YOUTUBE_VIDEO);
         err.message = `CONVERT-YOUTUBE-VIDEO-REQ-HANDLER: ${err.message}`;
-        throw err;
     } finally {
         timeLogger.log();
     }
