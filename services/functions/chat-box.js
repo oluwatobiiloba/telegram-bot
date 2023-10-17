@@ -1,10 +1,10 @@
 const docQueue = require('../../queue-workers/azure-queue-worker/queue');
 const resUtil = require('../../utils/res-util');
 const { logMsgs, dynamicBotMsgs } = require('../../messages');
-const { DOC_REGEX, JOB_PROCESS_DOC } = require('../../utils/constants');
+const { DOC_REGEX, JOB_PROCESS_DOC, YOUTUBE_REGEX } = require('../../utils/constants');
 const promptHandler = require('../handlers/prompt-handler');
 const logger = require('../../utils/logger');
-
+const youtubeConverter = require('../request-handlers/download-youtube-video')
 async function service(request, bot) {
   try {
     const body = await request.json();

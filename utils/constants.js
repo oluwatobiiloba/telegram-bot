@@ -1,6 +1,7 @@
 module.exports = {
   DOC_REGEX: /^\/(?:resume|document) [a-z0-9]{32}/g,
   APPLE_REGEX: /^https:\/\/music\.apple\.com\/\S+/gi,
+  YOUTUBE_REGEX: /https:\/\/www\.youtube\.com\/watch/i,
   CHATBOX_QUEUE_NAME: 'chatbox',
   JOB_PROCESS_DOC: 'process-document',
   NO_DB_RESOURCE_FOUND: 'No resource found!',
