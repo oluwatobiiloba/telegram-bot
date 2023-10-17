@@ -9,11 +9,11 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
     let funcResponse;
     if (isValidUrl) {
         timeLogger.start("getting-video-details");
-        const videoInfo = await ytdl.getInfo(prompt);
+        const videoInfo = await ytdl.getInfo(url);
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
 
-        const videoStream = ytdl(prompt, { quality: 'highest' });
+        const videoStream = ytdl(url, { quality: 'highest' });
         const chunks = [];
         
         videoStream.on('data', (chunk) => {
