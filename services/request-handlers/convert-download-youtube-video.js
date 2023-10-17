@@ -23,9 +23,10 @@ async function handler({ prompt, chatId, bot, body }) {
                 chunks.push(chunk);
             });
 
+            await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
+
             videoStream.on('end', async () => {
                 const videoBuffer = Buffer.concat(chunks);
-                await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
                 timeLogger.start("sending-video");
                 await bot.sendVideo(chatId, videoBuffer, {}, {
                     filename: videoInfo.videoDetails.title + ".mp4",
