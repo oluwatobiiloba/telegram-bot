@@ -27,7 +27,7 @@ async function handler({ prompt, chatId, bot, body }) {
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
            timeLogger.start("sending-video");
            await bot.sendVideo(chatId, videoReadStream, {}, {
-               filename: videoInfo.title
+               filename:  videoInfo.videoDetails.title
            });
             timeLogger.end("sending-video");
             funcResponse = resUtil.success({
@@ -47,7 +47,7 @@ async function handler({ prompt, chatId, bot, body }) {
         err.message = `CONVERT-YOUTUBE-VIDEO-REQ-HANDLER: ${err.message}`;
         throw err
     } finally {
-       timeLogger.log();
+      // timeLogger.log();
     }
 
 }
