@@ -15,7 +15,8 @@ async function handler({ prompt, chatId, bot, body }) {
             timeLogger.end("getting-video-details");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.title);
             timeLogger.start("sending-video");
-            await bot.sendVideo(chatId, ytdl(prompt), {}, {
+            const videoReadStream = ytdl(prompt);
+            await bot.sendVideo(chatId, videoReadStream, {}, {
                 filename: videoInfo.title
             });
             timeLogger.end("sending-video");
@@ -33,6 +34,7 @@ async function handler({ prompt, chatId, bot, body }) {
     } catch (err) {
         await bot.sendMessage(chatId, staticBotMsgs.ERROR_CON_YOUTUBE_VIDEO);
         err.message = `CONVERT-YOUTUBE-VIDEO-REQ-HANDLER: ${err.message}`;
+        throw err
     } finally {
         timeLogger.log();
     }

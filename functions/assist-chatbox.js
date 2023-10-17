@@ -5,6 +5,7 @@ const createBot = require('../utils/createTelegramBot');
 const { ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK } = process.env;
 const bot = createBot(ASSIST_BOT_TOKEN, ASSIST_BOT_WEBHOOK);
 
+
 app.http('assist_chatbox', {
   methods: ['POST'],
   authLevel: 'anonymous',
