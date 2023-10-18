@@ -59,7 +59,7 @@ async function handler({ prompt, chatId, bot, body }) {
                         timeLogger: timeLogger
                 });
                 } catch (err) {
-                    await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title);
+                    await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title + " " + err.message);
                 }
                
             }
