@@ -51,12 +51,17 @@ async function handler({ prompt, chatId, bot, body }) {
         let funcResponse;
         if (resolvedResp.items.length) {
             for (const item of resolvedResp.items) {
-                await downloadVideo({
-                    url: item.shortUrl,
-                    chatId: chatId,
-                    bot: bot,
-                    timeLogger: timeLogger
+                try {
+                    await downloadVideo({
+                        url: item.shortUrl,
+                        chatId: chatId,
+                        bot: bot,
+                        timeLogger: timeLogger
                 });
+                } catch (err) {
+                    await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title);
+                }
+               
             }
 
             funcResponse = resUtil.success({

@@ -46,5 +46,6 @@ module.exports = {
     'Linking Successful... Gathering thoughts...'
   ],
   ERROR_CON_YOUTUBE_VIDEO: "Invalid youtube url",
-  ERROR_CON_YOUTUBE_PLAYLIST: "Unable to complete the playlist conversion"
+  ERROR_CON_YOUTUBE_PLAYLIST: "Unable to complete the playlist conversion",
+  ERROR_PLAYLIST_VIDEO_CONVERSION: "Unable to convert or download - "
 };
