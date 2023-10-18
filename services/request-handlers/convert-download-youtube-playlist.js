@@ -37,7 +37,8 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
         await bot.sendDocument(chatId, videoBuffer, {}, {
-            filename: videoInfo.videoDetails.title ,
+            filename: videoInfo.videoDetails.title,
+            contentType: 'video/mp4',
         });
         timeLogger.end("send-video");
     }
@@ -68,11 +69,12 @@ async function handler({ prompt, chatId, bot, body }) {
                 message: logMsgs.VIDEO_DOWNLOADED,
                 data: resolvedResp.title,
             });
+            return funcResponse;
         } else {
             await bot.sendMessage(chatId, staticBotMsgs.ERROR_CON_YOUTUBE_VIDEO);
             funcResponse = resUtil.success(logMsgs.NO_VIDEO_CONVERTED);
+            return funcResponse;
         }
-        return funcResponse;
     } catch (err) {
         await bot.sendMessage(chatId, staticBotMsgs.ERROR_CON_YOUTUBE_PLAYLIST);
         err.message = `CONVERT-YOUTUBE-PLAYLIST-REQ-HANDLER: ${err.message}`;
