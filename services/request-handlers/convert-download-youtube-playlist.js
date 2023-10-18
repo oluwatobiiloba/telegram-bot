@@ -4,6 +4,27 @@ const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const resUtil = require("../../utils/res-util");
 
+async function downloadVideoAndReturnBuffer(url) {
+    return new Promise(async (resolve, reject) => {
+        const videoStream = ytdl(url);
+        const chunks = [];
+
+        videoStream.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+
+        videoStream.on('end', () => {
+            const videoBuffer = Buffer.concat(chunks);
+            resolve(videoBuffer);
+        });
+
+        videoStream.on('error', (error) => {
+            reject(error);
+        });
+    });
+}
+
+
 async function downloadVideo({ url, chatId, bot, timeLogger }) {
     const isValidUrl = await ytdl.validateURL(url);
     if (isValidUrl) {
@@ -11,27 +32,9 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         const videoInfo = await ytdl.getInfo(url);
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
-
-        const videoStream = ytdl(url);
-        const chunks = [];
-        
-        videoStream.on('data', (chunk) => {
-            chunks.push(chunk);
-        });
-
-        videoStream.on('end', async () => {
-            const videoBuffer = Buffer.concat(chunks);
-            timeLogger.start("sending-video");
-            await bot.sendVideo(chatId, videoBuffer, {}, {
-                filename: videoInfo.videoDetails.title + ".mp4",
-            });
-            timeLogger.end("sending-video");
-
-        });
-
-        videoStream.on('error', (error) => {
-            throw error;
-        });
+        timeLogger.start("fetch-and-send-video");
+        await downloadVideoAndReturnBuffer(url);
+        timeLogger.end("fetch-and-send-video");
     }
 }
 
