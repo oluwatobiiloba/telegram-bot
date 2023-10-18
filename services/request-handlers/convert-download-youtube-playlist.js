@@ -4,18 +4,29 @@ const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const resUtil = require("../../utils/res-util");
 
-async function downloadVideoAndStream(url, chatId, bot) {
-    const videoStream = ytdl(url, { quality: "highest" });
+async function downloadVideoAndReturnBuffer(url) {
+    return new Promise(async (resolve, reject) => {
+        const videoStream = ytdl(url, {
+            quality: "highest"
+        });
+        const chunks = [];
 
-    videoStream.on('data', async (chunk) => {
-        await bot.sendDocument(chatId, chunk, {}, { contentType: 'video/mp4' });
-    });
+        videoStream.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
 
-    return new Promise((resolve, reject) => {
-        videoStream.on('end', resolve);
-        videoStream.on('error', reject);
+        videoStream.on('end', () => {
+            const videoBuffer = Buffer.concat(chunks);
+            delete chunks;
+            resolve(videoBuffer);
+        });
+
+        videoStream.on('error', (error) => {
+            reject(error);
+        });
     });
 }
+
 
 async function downloadVideo({ url, chatId, bot, timeLogger }) {
     const isValidUrl = await ytdl.validateURL(url);
@@ -25,13 +36,17 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
         timeLogger.start("fetch-video");
-        await downloadVideoAndStream(url, chatId, bot);
+        const videoBuffer = await downloadVideoAndReturnBuffer(url);
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
+        await bot.sendDocument(chatId, videoBuffer, {}, {
+            filename: videoInfo.videoDetails.title,
+            contentType: 'video/mp4',
+        });
+        delete videoBuffer;
         timeLogger.end("send-video");
     }
 }
-
 
 async function handler({ prompt, chatId, bot, body }) {
     const resolvedResp = await ytpl(prompt);
