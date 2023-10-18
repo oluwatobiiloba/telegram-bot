@@ -39,12 +39,12 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
         await bot.sendDocument(chatId, videoBuffer, {}, {
-            filename: videoInfo.videoDetails.title,
+            filename: videoInfo.videoDetails.title + ".mp4",
             contentType: 'video/mp4',
         });
         delete videoBuffer;
 
-        await sleep(900)
+        await sleep(1000)
         
         timeLogger.end("send-video");
     }
@@ -68,7 +68,7 @@ async function handler({ prompt, chatId, bot, body }) {
                 } catch (err) {
                     await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title + " " + err.message);
                 }
-                await sleep(900)
+                await sleep(2000)
                
             }
 
