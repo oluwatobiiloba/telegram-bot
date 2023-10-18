@@ -47,5 +47,6 @@ module.exports = {
   ],
   ERROR_CON_YOUTUBE_VIDEO: "Invalid youtube url",
   ERROR_CON_YOUTUBE_PLAYLIST: "Unable to complete the playlist conversion",
-  ERROR_PLAYLIST_VIDEO_CONVERSION: "Unable to convert or download - "
+  ERROR_PLAYLIST_VIDEO_CONVERSION: "Unable to convert or download - ",
+  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos "
 };

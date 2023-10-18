@@ -56,6 +56,14 @@ async function handler({ prompt, chatId, bot, body }) {
 
     try {
         let funcResponse;
+        if (resolvedResp.items.length > 4) {
+            await bot.sendMessage(chatId, staticBotMsgs.CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM);
+            funcResponse = resUtil.success({
+                message: logMsgs.CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM,
+                data: resolvedResp.title,
+            });
+            return funcResponse;
+        }
         if (resolvedResp.items.length) {
             for (const item of resolvedResp.items) {
                 try {
