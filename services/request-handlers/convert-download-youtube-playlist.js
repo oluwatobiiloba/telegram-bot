@@ -6,7 +6,9 @@ const resUtil = require("../../utils/res-util");
 
 async function downloadVideoAndReturnBuffer(url) {
     return new Promise(async (resolve, reject) => {
-        const videoStream = ytdl(url);
+        const videoStream = ytdl(url, {
+            quality: "highest"
+        });
         const chunks = [];
 
         videoStream.on('data', (chunk) => {
@@ -40,6 +42,7 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
             filename: videoInfo.videoDetails.title,
             contentType: 'video/mp4',
         });
+        delete videoBuffer;
         timeLogger.end("send-video");
     }
 }
