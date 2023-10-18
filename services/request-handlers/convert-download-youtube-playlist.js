@@ -37,7 +37,7 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
         await bot.sendDocument(chatId, videoBuffer, {}, {
-            filename: videoInfo.videoDetails.title + ".mp4",
+            filename: videoInfo.videoDetails.title ,
         });
         timeLogger.end("send-video");
     }
