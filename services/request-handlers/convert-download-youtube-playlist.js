@@ -43,9 +43,7 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
             contentType: 'video/mp4',
         });
         delete videoBuffer;
-
-        await sleep(1000)
-        
+        await sleep(1500)
         timeLogger.end("send-video");
     }
 }
@@ -76,7 +74,6 @@ async function handler({ prompt, chatId, bot, body }) {
                 } catch (err) {
                     await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title + " " + err.message);
                 }
-                await sleep(2000)
                
             }
 
