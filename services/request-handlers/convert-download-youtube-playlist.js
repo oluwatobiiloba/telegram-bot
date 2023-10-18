@@ -4,28 +4,18 @@ const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const resUtil = require("../../utils/res-util");
 
-async function downloadVideoAndReturnBuffer(url) {
-    return new Promise(async (resolve, reject) => {
-        const videoStream = ytdl(url, {
-            quality: "highest"
-        });
-        const chunks = [];
+async function downloadVideoAndStream(url, chatId, bot) {
+    const videoStream = ytdl(url, { quality: "highest" });
 
-        videoStream.on('data', (chunk) => {
-            chunks.push(chunk);
-        });
+    videoStream.on('data', async (chunk) => {
+        await bot.sendDocument(chatId, chunk, {}, { contentType: 'video/mp4' });
+    });
 
-        videoStream.on('end', () => {
-            const videoBuffer = Buffer.concat(chunks);
-            resolve(videoBuffer);
-        });
-
-        videoStream.on('error', (error) => {
-            reject(error);
-        });
+    return new Promise((resolve, reject) => {
+        videoStream.on('end', resolve);
+        videoStream.on('error', reject);
     });
 }
-
 
 async function downloadVideo({ url, chatId, bot, timeLogger }) {
     const isValidUrl = await ytdl.validateURL(url);
@@ -35,17 +25,13 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
         timeLogger.start("fetch-video");
-        const videoBuffer = await downloadVideoAndReturnBuffer(url);
+        await downloadVideoAndStream(url, chatId, bot);
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
-        await bot.sendDocument(chatId, videoBuffer, {}, {
-            filename: videoInfo.videoDetails.title,
-            contentType: 'video/mp4',
-        });
-        delete videoBuffer;
         timeLogger.end("send-video");
     }
 }
+
 
 async function handler({ prompt, chatId, bot, body }) {
     const resolvedResp = await ytpl(prompt);
