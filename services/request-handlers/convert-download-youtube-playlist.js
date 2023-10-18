@@ -6,9 +6,7 @@ const resUtil = require("../../utils/res-util");
 
 async function downloadVideoAndReturnBuffer(url) {
     return new Promise(async (resolve, reject) => {
-        const videoStream = ytdl(url, {
-            quality: "highest"
-        });
+        const videoStream = ytdl(url);
         const chunks = [];
 
         videoStream.on('data', (chunk) => {
@@ -36,14 +34,15 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
         timeLogger.start("fetch-video");
-        const videoBuffer = await downloadVideoAndReturnBuffer(url);
+       // const videoBuffer = await downloadVideoAndReturnBuffer(url);
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
-        await bot.sendDocument(chatId, videoBuffer, {}, {
+        await bot.sendDocument(chatId,  ytdl(url), {}, {
             filename: videoInfo.videoDetails.title,
             contentType: 'video/mp4',
         });
         delete videoBuffer;
+        
         timeLogger.end("send-video");
     }
 }
