@@ -6,7 +6,6 @@ const resUtil = require("../../utils/res-util");
 
 async function downloadVideo({ url, chatId, bot, timeLogger }) {
     const isValidUrl = await ytdl.validateURL(url);
-    let funcResponse;
     if (isValidUrl) {
         timeLogger.start("getting-video-details");
         const videoInfo = await ytdl.getInfo(url);
@@ -28,10 +27,6 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
             });
             timeLogger.end("sending-video");
 
-            funcResponse = resUtil.success({
-                message: logMsgs.VIDEO_DOWNLOADED,
-                data: videoInfo.videoDetails.title,
-            });
         });
 
         videoStream.on('error', (error) => {

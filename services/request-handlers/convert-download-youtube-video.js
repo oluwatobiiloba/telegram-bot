@@ -3,6 +3,27 @@ const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const resUtil = require("../../utils/res-util");
 
+async function downloadVideoAndReturnBuffer(prompt) {
+    return new Promise(async (resolve, reject) => {
+        const videoStream = ytdl(prompt);
+        const chunks = [];
+
+        videoStream.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+
+        videoStream.on('end', () => {
+            const videoBuffer = Buffer.concat(chunks);
+            resolve(videoBuffer);
+        });
+
+        videoStream.on('error', (error) => {
+            reject(error);
+        });
+    });
+}
+
+
 async function handler({ prompt, chatId, bot, body }) {
     const isValidUrl = await ytdl.validateURL(prompt);
     const timeLogger = new TimeLogger(`CONVERT-YOUTUBLE-URL-DURATION-${Date.now()}`);
@@ -15,33 +36,15 @@ async function handler({ prompt, chatId, bot, body }) {
             const videoInfo = await ytdl.getInfo(prompt);
             timeLogger.end("getting-video-details");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
-
-            const videoStream = ytdl(prompt);
-            const chunks = [];
-            
-            videoStream.on('data', (chunk) => {
-                chunks.push(chunk);
-            });
-
+            timeLogger.start("fetch-and-send-video");
+            await downloadVideoAndReturnBuffer(prompt)
+            timeLogger.end("fetch-and-send-video");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
-
-            videoStream.on('end', async () => {
-                const videoBuffer = Buffer.concat(chunks);
-                timeLogger.start("sending-video");
-                await bot.sendVideo(chatId, videoBuffer, {}, {
-                    filename: videoInfo.videoDetails.title + ".mp4",
-                });
-                timeLogger.end("sending-video");
-
-                funcResponse = resUtil.success({
-                    message: logMsgs.VIDEO_DOWNLOADED,
-                    data: videoInfo.videoDetails.title,
-                });
+            funcResponse = resUtil.success({
+                message: logMsgs.VIDEO_DOWNLOADED,
+                data: videoInfo.videoDetails.title,
             });
 
-            videoStream.on('error', (error) => {
-                throw error;
-            });
         } else {
             await bot.sendMessage(chatId, staticBotMsgs.ERROR_CON_YOUTUBE_VIDEO);
             funcResponse = resUtil.success(logMsgs.NO_VIDEO_CONVERTED);
