@@ -3,7 +3,7 @@ const ytpl = require('ytpl');
 const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const resUtil = require("../../utils/res-util");
-
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function downloadVideoAndReturnBuffer(url) {
     return new Promise(async (resolve, reject) => {
         const videoStream = ytdl(url);
@@ -13,9 +13,10 @@ async function downloadVideoAndReturnBuffer(url) {
             chunks.push(chunk);
         });
 
-        videoStream.on('end', () => {
+        videoStream.on('end', async () => {
             const videoBuffer = Buffer.concat(chunks);
             delete chunks;
+            await sleep(500);
             resolve(videoBuffer);
         });
 
@@ -34,14 +35,16 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
         timeLogger.start("fetch-video");
-       // const videoBuffer = await downloadVideoAndReturnBuffer(url);
+        const videoBuffer = await downloadVideoAndReturnBuffer(url);
         timeLogger.end("fetch-video");
         timeLogger.start("send-video");
-        await bot.sendDocument(chatId,  ytdl(url), {}, {
+        await bot.sendDocument(chatId, videoBuffer, {}, {
             filename: videoInfo.videoDetails.title,
             contentType: 'video/mp4',
         });
         delete videoBuffer;
+
+        await sleep(900)
         
         timeLogger.end("send-video");
     }
@@ -61,10 +64,11 @@ async function handler({ prompt, chatId, bot, body }) {
                         chatId: chatId,
                         bot: bot,
                         timeLogger: timeLogger
-                });
+                    });
                 } catch (err) {
                     await bot.sendMessage(chatId, staticBotMsgs.ERROR_PLAYLIST_VIDEO_CONVERSION + item.title + " " + err.message);
                 }
+                await sleep(900)
                
             }
 
