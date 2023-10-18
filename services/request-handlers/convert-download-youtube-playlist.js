@@ -50,15 +50,14 @@ async function handler({ prompt, chatId, bot, body }) {
     try {
         let funcResponse;
         if (resolvedResp.items.length) {
-            const downloadPromises = resolvedResp.items.map(async (item) => {
+            for (const item of resolvedResp.items) {
                 await downloadVideo({
                     url: item.shortUrl,
                     chatId: chatId,
                     bot: bot,
                     timeLogger: timeLogger
                 });
-            });
-            await Promise.all(downloadPromises);
+            }
 
             funcResponse = resUtil.success({
                 message: logMsgs.VIDEO_DOWNLOADED,
