@@ -13,7 +13,7 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
 
-        const videoStream = ytdl(url, { quality: 'highest' });
+        const videoStream = ytdl(url);
         const chunks = [];
         
         videoStream.on('data', (chunk) => {

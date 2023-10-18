@@ -16,7 +16,7 @@ async function handler({ prompt, chatId, bot, body }) {
             timeLogger.end("getting-video-details");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
 
-            const videoStream = ytdl(prompt, { quality: 'highest' });
+            const videoStream = ytdl(prompt);
             const chunks = [];
             
             videoStream.on('data', (chunk) => {
