@@ -32,9 +32,14 @@ async function downloadVideo({ url, chatId, bot, timeLogger }) {
         const videoInfo = await ytdl.getInfo(url);
         timeLogger.end("getting-video-details");
         await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
-        timeLogger.start("fetch-and-send-video");
-        await downloadVideoAndReturnBuffer(url);
-        timeLogger.end("fetch-and-send-video");
+        timeLogger.start("fetch-video");
+        const videoBuffer = await downloadVideoAndReturnBuffer(url);
+        timeLogger.end("fetch-video");
+        timeLogger.start("send-video");
+        await bot.sendVideo(chatId, videoBuffer, {}, {
+            filename: videoInfo.videoDetails.title + ".mp4",
+        });
+        timeLogger.end("send-video");
     }
 }
 

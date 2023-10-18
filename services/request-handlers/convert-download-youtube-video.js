@@ -36,9 +36,14 @@ async function handler({ prompt, chatId, bot, body }) {
             const videoInfo = await ytdl.getInfo(prompt);
             timeLogger.end("getting-video-details");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[1] + videoInfo.videoDetails.title);
-            timeLogger.start("fetch-and-send-video");
-            await downloadVideoAndReturnBuffer(prompt)
-            timeLogger.end("fetch-and-send-video");
+            timeLogger.start("fetch-video");
+            const videoBuffer = await downloadVideoAndReturnBuffer(prompt)
+            timeLogger.end("fetch-video");
+            timeLogger.start("send-video");
+            await bot.sendVideo(chatId, videoBuffer, {}, {
+                filename: videoInfo.videoDetails.title + ".mp4",
+            });
+            timeLogger.end("send-video");
             await bot.sendMessage(chatId, staticBotMsgs.DOWNLOAD_YOUTUBE_SEQ[2] + videoInfo.videoDetails.title);
             funcResponse = resUtil.success({
                 message: logMsgs.VIDEO_DOWNLOADED,
