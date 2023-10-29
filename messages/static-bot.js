@@ -6,6 +6,8 @@ module.exports = {
     Create an Image : You can also ask me to create an image by asking me to create an image of a <your image prompt here>.
     Generate a Spotify Playlist: You can also generate a spotify playlist by asking me to 'Create a playlist, Mood - <describe the context or your mood>. Preferred Artist -  <describe the preferred artists or genres>.
 
+    To link your spotify account, send /link-spotify to link your spotify account.
+
     The following features are still under development and might not work as expected:
 
     Optimize Documents: You can optimize your pdf documents by sending me a pdf document. I will optimize the document and send it back to you.
@@ -48,5 +50,8 @@ module.exports = {
   ERROR_CON_YOUTUBE_VIDEO: "Invalid youtube url",
   ERROR_CON_YOUTUBE_PLAYLIST: "Unable to complete the playlist conversion",
   ERROR_PLAYLIST_VIDEO_CONVERSION: "Unable to convert or download - ",
-  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos "
+  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos ",
+  SPOTIFY_ACCOUNT_ALREADY_LINKED: "You already have a spotify account linked to Maya. Kinldy send /clear-spotify to unlink the account",
+  NO_USER_RECORD_FOUND: "Seems you have no linked spotify account",
+  SPOTIFY_ACCOUNT_UNLINKED: "Successfully unlinked your spotify account"
 };

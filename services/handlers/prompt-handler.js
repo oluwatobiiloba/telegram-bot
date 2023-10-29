@@ -49,7 +49,7 @@ module.exports = async function (body, bot) {
 
         return resUtil.success(staticBotMsgs.CLEAR_HISTORY);
 
-      case '/start':
+      case '/start': {
         logger.info(logMsgs.getConvoStarted(chatId), LOG_KEY);
         // get user if none then create one
         const userId = md5(String(chatId));
@@ -64,13 +64,68 @@ module.exports = async function (body, bot) {
         await bot.sendMessage(chatId, staticBotMsgs.START_CHAT);
 
         return resUtil.success(logMsgs.getConvoStarted(chatId));
+      }
+      case '/link-spotify': {
+        logger.info(logMsgs.linkSpotifyAccount(chatId), LOG_KEY);
+        // check if user has a spotify record
+        const userId = md5(String(chatId));
 
-      case '/help':
+        let { resource } = await userDao.getUser(userId);
+
+        if (!resource) {
+          await bot.sendMessage(chatId, staticBotMsgs.RESTART_CHAT);
+          throw new Error(logMsgs.getInvalidUserId(userId));
+        }
+
+        const spotify = resource.data?.tokens?.spotify;
+        if (!spotify || !spotify.refresh) {
+          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userChatId));
+          throw new Error(logMsgs.NO_REFRESH_TOKEN);
+        } else {
+          await bot.sendMessage(chatId, staticBotMsgs.SPOTIFY_ACCOUNT_ALREADY_LINKED);
+        }
+
+        return resUtil.success(logMsgs.getConvoStarted(chatId));
+      }
+      case '/clear-spotify': {
+        logger.info(logMsgs.clearSpotifyAuth(chatId), LOG_KEY);
+        // remove token record
+        const userId = md5(String(chatId));
+
+        let { resource } = await userDao.getUser(userId);
+
+        if (!resource) {
+          await bot.sendMessage(chatId, staticBotMsgs.NO_USER_RECORD_FOUND);
+          throw new Error(logMsgs.getInvalidUserId(userId));
+        }
+
+        const spotify = resource.data?.tokens?.spotify;
+        if (!spotify || !spotify.refresh) {
+          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userChatId));
+          throw new Error(logMsgs.NO_REFRESH_TOKEN);
+        } else {
+          const dbData = {
+            attribute: 'spotify',
+            tokens: {
+              id: null,
+              access: null,
+              refresh: null,
+            },
+          };
+      
+          await userDao.addTokens(userId, dbData);
+          await bot.sendMessage(chatId, staticBotMsgs.SPOTIFY_ACCOUNT_UNLINKED);
+        }
+
+        return resUtil.success(logMsgs.getConvoStarted(chatId));
+      }
+      case '/help': {
         logger.info(logMsgs.getHelpMessageSent(chatId), LOG_KEY);
 
         await bot.sendMessage(chatId, staticBotMsgs.HELP);
 
         return resUtil.success(logMsgs.getHelpMessageSent(chatId));
+      }
     }
     const reqArgs = { prompt, chatId, bot, body };
 

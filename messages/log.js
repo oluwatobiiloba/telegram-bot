@@ -32,7 +32,9 @@ module.exports = {
   YOUTUBE_VIDEO_DOWNLOADED: 'Youtube video downloaded and sent to user.',
   getFileUploadSuccess: (fileId) => `File Upload Successful. Id: ${fileId}`,
   getConvoStarted: (chatId) => `Conversation started with id - ${chatId}`,
+  linkSpotifyAccount: (chatId) => `Started spotify Oauth flow for id- ${chatId}`,
   getHelpMessageSent: (chatId) => `Help message sent to id - ${chatId}`,
   getImageGenFailed: (chatId) => `Could not generate images for id - ${chatId}`,
   getInvalidUserId: (id) => `Invalid request id - ${id}`,
+  clearSpotifyAuth: (id) => `Clearing spotify auth tokens for id - ${id}`
 };
