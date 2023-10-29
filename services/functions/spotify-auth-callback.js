@@ -23,7 +23,7 @@ module.exports = async function (req) {
       throw new Error(logMsgs.MISSING_JOB_DATA);
     }
 
-    const isManual = suspendJobData?.data.isManual;
+    const isManual = suspendJobData.data.isManual;
 
     bot = createTelegramBot(suspendJobData.data.botToken);
     chatId = suspendJobData.data?.chatId;
