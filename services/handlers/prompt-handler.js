@@ -8,6 +8,7 @@ const logger = require('../../utils/logger');
 const middlewareHandler = require('./middleware-handler');
 const userDao = require('../../daos/user');
 const md5 = require('md5');
+const suspendedJob = require('../../daos/suspended-job');
 
 module.exports = async function (body, bot) {
   const timeLogger = new TimeLogger(`PROMPT-HANDLER-DURATION-${Date.now()}`);
@@ -79,6 +80,13 @@ module.exports = async function (body, bot) {
 
         const spotify = resource.data?.tokens?.spotify;
         if (!spotify || !spotify.refresh) {
+          const jobData = {
+            attribute: 'spotify',
+            isManual: true,
+            chatId
+          };
+      
+          await suspendedJob.createJob(userId,jobData)
           await bot.sendMessage(chatId, dynamicBotMsgs.getManualAuthLink(userId,chatId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
         } else {

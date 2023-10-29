@@ -13,20 +13,20 @@ module.exports = async function (req) {
   const code = req.query.get('code');
   const userId = req.query.get('state');
   const error = req.query.get('error');
-  const isManual = req.query.get('isManual');
-  const manualChatId = req.query.get('chatId')
 
   let timeLogger, bot, chatId;
 
   try {
     const { resource: suspendJobData } = await suspendedJobDao.getJob(userId);
 
-    if (!suspendJobData?.data && !isManual) {
+    if (!suspendJobData?.data) {
       throw new Error(logMsgs.MISSING_JOB_DATA);
     }
 
+    const isManual = suspendJobData?.data.isManual;
+
     bot = createTelegramBot(suspendJobData.data.botToken);
-    chatId = suspendJobData.data?.chatId || manualChatId;
+    chatId = suspendJobData.data?.chatId;
 
     if (error) throw new Error(`Authorization error: ${error}`);
 
@@ -78,6 +78,8 @@ module.exports = async function (req) {
         botToken: bot.token,
         id: userId,
       });
+    } else {
+      suspendedJobDao.deleteJob(userId);
     }
 
     return resUtil.success('Authorization successful!');

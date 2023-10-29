@@ -97,5 +97,5 @@ module.exports = {
     const idStr = id.toString();
 
     return user.delete(idStr);
-  },
+  }
 };

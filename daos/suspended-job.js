@@ -34,5 +34,5 @@ module.exports = {
     const idStr = id.toString();
 
     return suspendedjob.delete(idStr);
-  },
+  }
 };
