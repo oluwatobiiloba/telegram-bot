@@ -1,6 +1,6 @@
 const mediaHandler = require('./media-handler');
 const chatDao = require('../../daos/chat-history');
-const { staticBotMsgs, logMsgs } = require('../../messages');
+const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require('../../messages');
 const resUtil = require('../../utils/res-util');
 const promptMapper = require('../../utils/prompt-mapper');
 const TimeLogger = require('../../utils/timelogger');
