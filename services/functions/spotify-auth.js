@@ -7,7 +7,7 @@ const { logMsgs } = require('../../messages');
 
 module.exports = async function (req) {
   const id = req.query.get('i');
-  const isManual = req.query.get('source') = 'manual' ? true : false;
+  const isManual = req.query.get('source') === 'manual' ? true : false;
   const chatId = req.query.get('chatId');
 
   try {
