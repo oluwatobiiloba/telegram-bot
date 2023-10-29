@@ -13,18 +13,20 @@ module.exports = async function (req) {
   const code = req.query.get('code');
   const userId = req.query.get('state');
   const error = req.query.get('error');
+  const isManual = req.query.get('isManual');
+  const manualChatId = req.query.get('chatId')
 
   let timeLogger, bot, chatId;
 
   try {
     const { resource: suspendJobData } = await suspendedJobDao.getJob(userId);
 
-    if (!suspendJobData?.data) {
+    if (!suspendJobData?.data && !isManual) {
       throw new Error(logMsgs.MISSING_JOB_DATA);
     }
 
     bot = createTelegramBot(suspendJobData.data.botToken);
-    chatId = suspendJobData.data.chatId;
+    chatId = suspendJobData.data?.chatId || manualChatId;
 
     if (error) throw new Error(`Authorization error: ${error}`);
 
@@ -71,10 +73,12 @@ module.exports = async function (req) {
 
     await bot.sendMessage(chatId, staticBotMsgs.CALLBACK_AUTH_MSGS[2]);
 
-    await azureQueue.sendMessage('process-suspended-job', {
-      botToken: bot.token,
-      id: userId,
-    });
+    if (!isManual) {
+      await azureQueue.sendMessage('process-suspended-job', {
+        botToken: bot.token,
+        id: userId,
+      });
+    }
 
     return resUtil.success('Authorization successful!');
   } catch (err) {

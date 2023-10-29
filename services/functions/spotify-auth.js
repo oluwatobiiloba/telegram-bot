@@ -7,6 +7,8 @@ const { logMsgs } = require('../../messages');
 
 module.exports = async function (req) {
   const id = req.query.get('i');
+  const isManual = req.query.get('source') = 'manual' ? true : false;
+  const chatId = req.query.get('chatId');
 
   try {
     if (!id) throw new Error(logMsgs.ID_IS_REQUIRED);
@@ -22,6 +24,8 @@ module.exports = async function (req) {
       scope: SCOPES,
       redirect_uri: REDIRECT_URI,
       state: id,
+      isManual: isManual,
+      chatId: chatId
     });
 
     const authUrl = `${authEndpoint}?${params}`;

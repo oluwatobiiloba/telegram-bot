@@ -14,4 +14,6 @@ module.exports = {
   getPlaylistGenerated: (url) => `Here's your playlist 🤖, as promised : ${url}.`,
   getSpotifyAuth: (id) =>
     `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}`,
+  getManualAuthLink: (id,chatId) =>
+    `Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}&source=manual&chatId=${chatId}`,
 };
