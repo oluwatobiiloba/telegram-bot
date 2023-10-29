@@ -79,7 +79,7 @@ module.exports = async function (body, bot) {
 
         const spotify = resource.data?.tokens?.spotify;
         if (!spotify || !spotify.refresh) {
-          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userChatId));
+          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
         } else {
           await bot.sendMessage(chatId, staticBotMsgs.SPOTIFY_ACCOUNT_ALREADY_LINKED);
@@ -101,7 +101,7 @@ module.exports = async function (body, bot) {
 
         const spotify = resource.data?.tokens?.spotify;
         if (!spotify || !spotify.refresh) {
-          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userChatId));
+          await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
         } else {
           const dbData = {
