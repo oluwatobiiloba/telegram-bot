@@ -87,7 +87,7 @@ module.exports = async function (body, bot) {
             botToken: bot.token
           };
       
-          await suspendedJob.updateJob(userId, jobData)
+          await suspendedJob.createJob(userId, jobData)
           await bot.sendMessage(chatId, dynamicBotMsgs.getManualAuthLink(userId,chatId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
         } else {
