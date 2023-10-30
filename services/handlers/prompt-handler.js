@@ -84,10 +84,10 @@ module.exports = async function (body, bot) {
             attribute: 'spotify',
             isManual: true,
             chatId,
-            token: bot.token
+            botToken: bot.token
           };
       
-          await suspendedJob.createJob(userId, jobData)
+          await suspendedJob.updateJob(userId, jobData)
           await bot.sendMessage(chatId, dynamicBotMsgs.getManualAuthLink(userId,chatId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
         } else {
