@@ -112,17 +112,8 @@ module.exports = async function (body, bot) {
         if (!spotify || !spotify.refresh) {
           await bot.sendMessage(chatId, dynamicBotMsgs.getSpotifyAuth(userId));
           throw new Error(logMsgs.NO_REFRESH_TOKEN);
-        } else {
-          const dbData = {
-            attribute: 'spotify',
-            tokens: {
-              id: null,
-              access: null,
-              refresh: null,
-            },
-          };
-      
-          await userDao.addTokens(userId, dbData);
+        } else {     
+          await userDao.clearUserToken(userId, "spotify");
           await bot.sendMessage(chatId, staticBotMsgs.SPOTIFY_ACCOUNT_UNLINKED);
         }
 

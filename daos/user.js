@@ -97,5 +97,16 @@ module.exports = {
     const idStr = id.toString();
 
     return user.delete(idStr);
+  },
+
+  async clearUserToken(id, attribute) {
+    const idStr = id.toString();
+
+    const patchOperations = [
+      { op: 'replace', path: `${TOKENS_BASE_PATH}/${attribute}`, value: {} },
+    ];
+
+    return user.update(idStr, patchOperations);
+
   }
 };
