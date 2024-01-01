@@ -7,7 +7,7 @@ const resUtil = require("../../utils/res-util");
 const maxPlaylistSize = MAX_PLAYLIST_SIZE_YOUTUBE || 10; 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function downloadVideoAndReturnStream(url) {
-   return ytdl.downloadFromInfo(ytdl.getInfo(url))
+   return ytdl.downloadFromInfo(await ytdl.getInfo(url))
 }
 
 
