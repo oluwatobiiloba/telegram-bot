@@ -38,7 +38,7 @@ async function handler({ prompt, chatId, bot, body }) {
 
     try {
         let funcResponse;
-        if (resolvedResp.items.length > ) {
+        if (resolvedResp.items.length > maxPlaylistSize) {
             await bot.sendMessage(chatId, dynamicBotMsgs.convertYoutubePlaylistFailedMax( maxPlaylistSize || 10));
             funcResponse = resUtil.success({
                 message: logMsgs.convertYoutubePlaylistFailedMax( maxPlaylistSize || 10),
