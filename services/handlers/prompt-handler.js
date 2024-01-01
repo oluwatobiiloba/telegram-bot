@@ -130,7 +130,6 @@ module.exports = async function (body, bot) {
     const reqArgs = { prompt, chatId, bot, body };
 
     const handler = promptMapper(prompt);
-    logger.info(`${handler} ${prompt}`,"trouble shooting")
 
     const handlerFunc = require(`../request-handlers/${handler}`);
 

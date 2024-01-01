@@ -4,6 +4,7 @@ const TimeLogger = require("../../utils/timelogger");
 const { staticBotMsgs, logMsgs, dynamicBotMsgs } = require("../../messages");
 const { MAX_PLAYLIST_SIZE_YOUTUBE } = process.env;
 const resUtil = require("../../utils/res-util");
+const maxPlaylistSize = MAX_PLAYLIST_SIZE_YOUTUBE || 10; 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function downloadVideoAndReturnStream(url) {
    return ytdl.downloadFromInfo(ytdl.getInfo(url))
@@ -37,10 +38,10 @@ async function handler({ prompt, chatId, bot, body }) {
 
     try {
         let funcResponse;
-        if (resolvedResp.items.length > 4) {
-            await bot.sendMessage(chatId, dynamicBotMsgs.convertYoutubePlaylistFailedMax(MAX_PLAYLIST_SIZE_YOUTUBE || 10));
+        if (resolvedResp.items.length > ) {
+            await bot.sendMessage(chatId, dynamicBotMsgs.convertYoutubePlaylistFailedMax( maxPlaylistSize || 10));
             funcResponse = resUtil.success({
-                message: logMsgs.convertYoutubePlaylistFailedMax(MAX_PLAYLIST_SIZE_YOUTUBE || 10),
+                message: logMsgs.convertYoutubePlaylistFailedMax( maxPlaylistSize || 10),
                 data: resolvedResp.title,
             });
             return funcResponse;
