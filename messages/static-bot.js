@@ -50,7 +50,7 @@ module.exports = {
   ERROR_CON_YOUTUBE_VIDEO: "Invalid youtube url",
   ERROR_CON_YOUTUBE_PLAYLIST: "Unable to complete the playlist conversion",
   ERROR_PLAYLIST_VIDEO_CONVERSION: "Unable to convert or download - ",
-  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos ",
+  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos",
   SPOTIFY_ACCOUNT_ALREADY_LINKED: "You already have a spotify account linked to Maya. Kinldy send /clear-spotify to unlink the account",
   NO_USER_RECORD_FOUND: "Seems you have no linked spotify account",
   SPOTIFY_ACCOUNT_UNLINKED: "Successfully unlinked your spotify account"

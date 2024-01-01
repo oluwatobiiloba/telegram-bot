@@ -30,6 +30,8 @@ module.exports = {
   NO_PROFILE_ID_TOKEN: 'No profile Id gotten from Spotify',
   NO_SPOTIFY_TOKENS: 'No tokens gotten from Spotify',
   YOUTUBE_VIDEO_DOWNLOADED: 'Youtube video downloaded and sent to user.',
+  CAN_ONLY_CONVERT_PLAYLISTS_WITH_MAXIMUM: "Unable to convert or download playlists with over 4 videos",
+  convertYoutubePlaylistFailedMax: (max) => `Unable to convert or download playlists with over ${max} videos`,
   getFileUploadSuccess: (fileId) => `File Upload Successful. Id: ${fileId}`,
   getConvoStarted: (chatId) => `Conversation started with id - ${chatId}`,
   linkSpotifyAccount: (chatId) => `Started spotify Oauth flow for id- ${chatId}`,
