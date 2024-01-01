@@ -16,4 +16,5 @@ module.exports = {
     `You do not have a spotify account linked to your telegram account. Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}`,
   getManualAuthLink: (id,chatId) =>
     `Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}&source=manual&chatId=${chatId}`,
+  convertYoutubePlaylistFailedMax: (max) => `Unable to convert or download playlists with over ${max} videos`,
 };
