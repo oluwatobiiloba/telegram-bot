@@ -12,7 +12,7 @@ module.exports = (prompt) => {
     handler = 'convert-apple-playlist';
   } else if (YOUTUBE_REGEX.test(prompt)) {
     if (prompt.includes("list=")) {
-      handler = 'convert-download-youtube-playlist-v2'
+      handler = 'convert-download-youtube-playlist'
     } else {
       handler = 'convert-download-youtube-video' 
     }
