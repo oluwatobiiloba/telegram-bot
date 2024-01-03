@@ -17,4 +17,5 @@ module.exports = {
   getManualAuthLink: (id,chatId) =>
     `Kindly use this link to link your account: ${process.env.WEBHOOK_URL}/api/spotify?i=${id}&source=manual&chatId=${chatId}`,
   convertYoutubePlaylistFailedMax: (max) => `Unable to convert or download playlists with over ${max} videos`,
+  youtubePlaylistLargeSize: (name) => `${name} is too large to be processed at once, I'll have to split it into parts`,
 };
