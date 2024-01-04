@@ -6,10 +6,10 @@ const resUtil = require("../../utils/res-util");
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const { MAX_PLAYLIST_SIZE_YOUTUBE, MAX_VIDEO_PART_SIZE } = process.env;
 const maxPlaylistSize = MAX_PLAYLIST_SIZE_YOUTUBE || 10;
-const ffmpeg = require('fluent-ffmpeg');
 const stream = require('stream');
 const fs = require('fs');
 const path = require('path');
+const queueService = require('../../queue-workers/azure-queue-worker/queue')
 async function getVideoSize(url) {
     try {
       const info = await ytdl.getInfo(url);
@@ -77,7 +77,6 @@ async function downloadVideoandSendInBits(url, videoInfo, options = {}, bot, cha
         fs.mkdirSync(outputPath, { recursive: true });
       }
       const partsDurationArray = computePartDurations(videoInfo.formats[0], MAX_VIDEO_PART_SIZE || 45);
-      let partNumber = 1;
       const videoName = videoInfo.videoDetails.title.slice(0,10).replace(" ","_").trim()
       videoFilename = path.join(outputPath, videoName + '.mp4');
       timeLogger.start("fetch-video");
@@ -85,27 +84,18 @@ async function downloadVideoandSendInBits(url, videoInfo, options = {}, bot, cha
       timeLogger.end("fetch-video");
       videoStream.pipe(fs.createWriteStream(videoFilename)).on('close', async () => {
         if (partsDurationArray.length) {
-          for (const part of partsDurationArray) {
-            timeLogger.start(`splitting-part-${partNumber}-of-${partsDurationArray.length}`);
-            let partStream = await videoSplitter(videoFilename, part.start, part.end - part.start)
-            timeLogger.end(`splitting-part-${partNumber}-of-${partsDurationArray.length}`);
-            timeLogger.start(`converting-part-${partNumber}-of-${partsDurationArray.length}-to-buffer`);
-            let partBuffer = await downloadVideoAndReturnBuffer(null, {}, partStream)
-            timeLogger.end(`converting-part-${partNumber}-of-${partsDurationArray.length}-to-buffer`);
-            timeLogger.start(`sending-part-${partNumber}-of-${partsDurationArray.length}-to-user`);
-            await bot.sendVideo(chatId, partBuffer, {}, {
-              filename: videoInfo.videoDetails.title.slice(0,12) + `part_${partNumber}` + ".mp4",
-              contentType: 'video/mp4',
+          for (const [i, part] of partsDurationArray.entries()) {
+            timeLogger.start(`sending-part-${i + 1}-of-${partsDurationArray.length}-to-queue`);
+            await queueService.sendMessage("process-video-parts", {
+              videoFilename,
+              part,
+              numberOfParts: partsDurationArray.length,
+              partNumber: i + 1,
+              deleteFile: partsDurationArray.length === i + 1 ? true : false,
             });
-            timeLogger.end(`sending-part-${partNumber}-of-${partsDurationArray.length}-to-user`);
-            partBuffer = [];
-            partNumber++
-            sleep(700)
+            timeLogger.end(`sending-part-${i + 1}-of-${partsDurationArray.length}-to-queue`);
           }
         }
-        fs.unlink(videoFilename,(err) => {
-          if (err) throw err;
-        })
         resolve(true)
       })
     } catch (error) {
@@ -115,21 +105,6 @@ async function downloadVideoandSendInBits(url, videoInfo, options = {}, bot, cha
       reject(error);
     }
   })
-}
-
-async function videoSplitter(filename, start, duration) {
-  return new Promise((resolve, reject) => {
-    let ffmpegStream = ffmpeg(filename)
-      .setStartTime(start)
-      .setDuration(duration)
-      .videoCodec('copy')
-      .audioCodec('copy')
-      .outputOptions('-movflags frag_keyframe+empty_moov')
-      .format('mp4')
-      .on('error', function (err) {
-      })
-      resolve(ffmpegStream.pipe())
-  });
 }
 
 async function splitAndSendVideoParts({ url, chatId, bot, timeLogger,videoInfo}) {
