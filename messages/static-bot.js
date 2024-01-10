@@ -32,7 +32,8 @@ module.exports = {
     "You'll have to give me a minute or more 🌝, I'll send your playlist once I'm done.",
     'Still working on it , my creator is still working on making me faster 🤖. In the meantime,  take me as I am 🤗.',
     'Almost done..., I promise 🤞.',
-    ' If you do not have a Spotify account, you can visit https://soundiiz.com/ to convert the playlist to your preferred music service.'
+    'If you do not have a Spotify account, you can visit https://soundiiz.com/ to convert the playlist to your preferred music service.',
+    'Playlist too short, getting additional songs for you 🤗.',
   ],
     DOWNLOAD_YOUTUBE_SEQ: [
       "You'll have to give me a minute or more 🌝, I'll send your video once I'm done.",

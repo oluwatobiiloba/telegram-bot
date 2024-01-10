@@ -7,7 +7,7 @@ const provideMap = new Map([
 const aiDao = require(`../../daos/${provideMap.get(ACTIVE_AI_PROVIDER || 'cloudfare')}`);
 const { logMsgs, staticBotMsgs } = require('../../messages');
 const logger = require('../../utils/logger');
-const { generatePrompt } = require('../../utils/promptBuilder');
+const { generatePrompt } = require('../../utils/prompt-builder');
 const resUtil = require('../../utils/res-util');
 const TimeLogger = require('../../utils/timelogger');
 
@@ -28,10 +28,9 @@ module.exports = async function ({ prompt, chatId, bot }) {
     }
     return chatHistory;
   }
-
     chatHistory = ensureMaxChatLength(chatHistory, 7);
 
-    const promptMessages = chatHistory.map(({ content }) => content && content.length < 1000);
+    const promptMessages = chatHistory.filter(({ content }) => content && content.length < 1000);
 
     timeLogger.start('getting-AI-response');
 

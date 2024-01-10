@@ -39,6 +39,7 @@ module.exports = {
                 prompt: message
             }
         }
+
         const URL = CLOUDFARE_CONFIG.URL({ CF_ACCOUNT_ID, model });
         const response = await cloudfareAI.post(URL, payload);
         return response.data;

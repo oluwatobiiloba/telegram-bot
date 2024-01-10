@@ -4,6 +4,7 @@ const { logMsgs, dynamicBotMsgs } = require('../../messages');
 const { DOC_REGEX, JOB_PROCESS_DOC, YOUTUBE_REGEX } = require('../../utils/constants');
 const promptHandler = require('../handlers/prompt-handler');
 const logger = require('../../utils/logger');
+require('dotenv').config();
 async function service(request, bot) {
   try {
     const body = await request.json();
@@ -27,8 +28,6 @@ async function service(request, bot) {
 
     return response;
   } catch (error) {
-    // console.log(error);
-
     logger.error(error, `CHAT-BOX-ERROR-${Date.now()}`);
 
     return resUtil.error(200, error);
