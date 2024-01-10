@@ -14,6 +14,7 @@
     "@azure/storage-queue": "^12.13.0",
     "@bull-board/api": "^5.0.0",
     "@bull-board/express": "^5.0.0",
+    "@cloudflare/ai": "^1.0.47",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@logtail/node": "^0.4.0",
     "@logtail/pino": "^0.4.0",

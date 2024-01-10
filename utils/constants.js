@@ -8,4 +8,15 @@ module.exports = {
   OPEN_AI_IMG_URL: '/images/generations',
   OPEN_AI_CHAT_URL: '/chat/completions',
   IMG_SIZE: '1024x1024',
+  CLOUDFARE_CONFIG: {
+    URL:  ({model,CF_ACCOUNT_ID}) => {
+      return `/accounts/${CF_ACCOUNT_ID}/ai/run/${model}`;
+    },
+    MODELS: {
+      IMAGE_CLASSIFICATION: '@cf/microsoft/resnet-50',
+      IMAGE_GENERATION: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+      CHAT: '@cf/meta/llama-2-7b-chat-int8',
+      SPEECH_TO_TEXT: "@cf/openai/whisper"
+    }
+  }
 };
