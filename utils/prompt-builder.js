@@ -72,7 +72,6 @@ module.exports = {
                         content: promptMsgs.INIT
                     }
                 )
-                console.log("userInput",userInput)
                 if (Array.isArray(userInput)) {
                     messages = messages.concat(userInput)
                 }
