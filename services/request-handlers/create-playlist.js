@@ -48,7 +48,11 @@ async function handler({ prompt, chatId, bot, body }) {
       aiReply = choices.result?.response
     }
 
+    logger.info({ prompt: playlistMessage, aiResponse: aiReply }, `CREATE-PLAYLIST-${Date.now()}`);
+
     let songList = aiReply.substring(aiReply.indexOf('['), aiReply.lastIndexOf(']') + 1);
+
+    logger.info({ songList: songList }, `CREATE-PLAYLIST-${Date.now()}`);
 
     songList = JSON.parse(songList);
 
