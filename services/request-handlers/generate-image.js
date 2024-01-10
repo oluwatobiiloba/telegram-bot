@@ -10,7 +10,7 @@ const { staticBotMsgs, logMsgs } = require('../../messages');
 const { IMG_SIZE } = require('../../utils/constants');
 const TimeLogger = require('../../utils/timelogger');
 const { binaryUpload } = require('../../utils/image-converter');
-const { generatePrompt } = require('../../utils/promptBuilder');
+const { generatePrompt } = require('../../utils/prompt-builder');
 module.exports = async function ({ prompt, chatId, bot }) {
   const timeLogger = new TimeLogger(`GENERATE-IMAGE-DURATION-${Date.now()}`);
   try {

@@ -1,7 +1,7 @@
 const { promptMsgs, logMsgs } = require('../messages');
 
 module.exports = {
-    generatePrompt: ({userInput, module}) => {
+    generatePrompt: ({userInput, module, prevContext}) => {
         let messages = [];
         switch (module) {
             case "playlist-generator":
@@ -12,7 +12,19 @@ module.exports = {
                     },
                     {
                         role: 'user',
-                        content: userInput
+                        content: promptMsgs.CREATE_CLOUDFARE_PLAYLIST_INSTRUCTION + userInput
+                    }
+                )
+                return messages;
+            case "playlist-addition-generator":
+                messages.push(
+                    {
+                        role: 'system',
+                        content: promptMsgs.CREATE_CLOUDFARE_PLAYLIST
+                    },
+                    {
+                        role: 'user',
+                        content: promptMsgs.CREATE_CLOUDFARE_PLAYLIST_ADDITION(prevContext, userInput)
                     }
                 )
                 return messages;
