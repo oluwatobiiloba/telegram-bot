@@ -1,7 +1,13 @@
 const chatDao = require('../../daos/chat-history');
-const aiDao = require('../../daos/open-AI');
+const { ACTIVE_AI_PROVIDER } = process.env;
+const provideMap = new Map([
+  ['cloudfare', 'cloudfare-ai-worker'],
+  ['openai', 'open-AI'],
+])
+const aiDao = require(`../../daos/${provideMap.get(ACTIVE_AI_PROVIDER || 'cloudfare')}`);
 const { logMsgs, staticBotMsgs } = require('../../messages');
 const logger = require('../../utils/logger');
+const { generatePrompt } = require('../../utils/promptBuilder');
 const resUtil = require('../../utils/res-util');
 const TimeLogger = require('../../utils/timelogger');
 
@@ -16,17 +22,34 @@ module.exports = async function ({ prompt, chatId, bot }) {
 
     chatHistory.push({ role: 'user', content: prompt });
 
-    if (chatHistory.length > 7) chatHistory.shift();
+    function ensureMaxChatLength(chatHistory, maxLength) {
+    if (chatHistory.length > maxLength) {
+      chatHistory = chatHistory.slice(chatHistory.length - maxElements);
+    }
+    return chatHistory;
+  }
 
-    const promptMessages = chatHistory.filter(({ content }) => content && content.length < 1000);
+    chatHistory = ensureMaxChatLength(chatHistory, 7);
+
+    const promptMessages = chatHistory.map(({ content }) => content && content.length < 1000);
 
     timeLogger.start('getting-AI-response');
 
-    const choices = await aiDao.prompt(promptMessages);
+    const aiPrompt = generatePrompt({
+      userInput: promptMessages
+    })
+
+    const choices = await aiDao.prompt(aiPrompt);
 
     timeLogger.end('getting-AI-response');
 
-    const aiReply = choices[0].message.content;
+    let aiReply;
+
+    if(Array.isArray(choices)) {
+      aiReply = choices[0]?.message?.content;
+    } else {
+      aiReply = choices.result?.response
+    }
 
     await bot.sendMessage(chatId, aiReply);
 

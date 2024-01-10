@@ -45,7 +45,6 @@ module.exports = {
 
     try {
       const response = await openAI.post(OPEN_AI_CHAT_URL, payload);
-
       return response.data.choices;
     } catch (err) {
       throw APIError(err);

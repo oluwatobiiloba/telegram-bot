@@ -1,10 +1,16 @@
 const { staticBotMsgs, promptMsgs, logMsgs, dynamicBotMsgs } = require('../../messages');
-const aiDao = require('../../daos/open-AI');
+const { ACTIVE_AI_PROVIDER } = process.env;
+const provideMap = new Map([
+  ['cloudfare', 'cloudfare-ai-worker'],
+  ['openai', 'open-AI'],
+])
+const aiDao = require(`../../daos/${provideMap.get(ACTIVE_AI_PROVIDER)}`);
 const chatDao = require('../../daos/chat-history');
 const musicDao = require('../../daos/spotify');
 const resUtil = require('../../utils/res-util');
 const logger = require('../../utils/logger');
 const TimeLogger = require('../../utils/timelogger');
+const { generatePrompt } = require('../../utils/promptBuilder');
 
 async function handler({ prompt, chatId, bot, body }) {
   const timeLogger = new TimeLogger(`CREATE-PLAYLIST-DURATION-${Date.now()}`);
@@ -16,11 +22,17 @@ async function handler({ prompt, chatId, bot, body }) {
     await bot.sendMessage(chatId, staticBotMsgs.GEN_PLAYLIST_SEQ[0]);
 
     // const playlistMessage = prompt.replace('create a playlist', `${promptMsgs.CREATE_PLAYLIST}`);
-    const playlistMessage = `${prompt}, ${promptMsgs.CREATE_PLAYLIST}`;
+    //const playlistMessage = `${prompt}, ${promptMsgs.CREATE_PLAYLIST}`;
+
+    const cleanInput = prompt.replace('create a playlist', "").trim();
+    prompt = generatePrompt({
+      userInput: cleanInput,
+      module: "playlist-generator"
+    })
 
     timeLogger.start('getting-AI-list');
 
-    const choices = await aiDao.prompt(playlistMessage);
+    const choices = await aiDao.prompt(prompt);
 
     timeLogger.end('getting-AI-list');
 
@@ -29,8 +41,12 @@ async function handler({ prompt, chatId, bot, body }) {
     if (!choices) {
       throw new Error(logMsgs.NO_AI_RESPONSE);
     }
-
-    const aiReply = choices[0]?.message?.content;
+    let aiReply;
+    if(Array.isArray(choices)) {
+      aiReply = choices[0]?.message?.content;
+    } else {
+      aiReply = choices.result?.response
+    }
 
     let songList = aiReply.substring(aiReply.indexOf('['), aiReply.lastIndexOf(']') + 1);
 

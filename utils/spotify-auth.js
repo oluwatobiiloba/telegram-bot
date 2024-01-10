@@ -7,8 +7,8 @@ const state = crypto.randomBytes(20).toString('hex');
 
 const app = express();
 const PORT = 8888;
-const CLIENT_ID = process.env.CLIENT_ID || '482a639505514022863440361d2abaac';
-const CLIENT_SECRET = process.env.CLIENT_SECRET || '604af0e299af411cbdc797c8d94dcdd7';
+const CLIENT_ID = process.env.CLIENT_ID
+const CLIENT_SECRET = process.env.CLIENT_SECRET
 const REDIRECT_URI = 'http://localhost:8888/callback';
 const STATE = state;
 const SCOPES = 'playlist-modify-public playlist-modify-private ugc-image-upload playlist-read-collaborative ';
@@ -61,9 +61,7 @@ app.get('/callback', async (req, res) => {
             }
         };
         const tokenRes = await axios.post(tokenEndpoint, tokenParams, tokenConfig);
-        console.log(tokenRes.data);
         const accessToken = tokenRes.data.access_token;
-        console.log(`Access token: ${accessToken}`);
         res.send(`Access token: ${accessToken}`);
     } catch (err) {
         console.error(`Failed to retrieve access token: ${err.message}`);
