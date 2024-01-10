@@ -32,7 +32,7 @@ module.exports = {
         let payload;
         if (Array.isArray(message)) {
             payload = {
-                message
+                messages: message
             }
         } else {
             payload = {
@@ -48,7 +48,7 @@ module.exports = {
   },
 
   async generateImages(data, model = CLOUDFARE_CONFIG.MODELS.IMAGE_GENERATION) {
-    try {
+      try {
         const payload = {
             prompt: data.prompt
         }

@@ -32,7 +32,7 @@ async function downloadVideoAndReturnBuffer(url, options = {}, videoStreamInput)
     } else if (url && !videoStreamInput) {
       videoStream = ytdl(url, options);
     } else {
-      throw new Error("Please provide youtube url r a readable stream")
+      throw new Error("Please provide youtube url or a readable stream")
     }
     let chunks = [];
 
@@ -66,7 +66,7 @@ function computePartDurations(videoInfo, targetSizeMB) {
     });
     return partDurations;
   }
-  
+
 async function downloadVideoandSendInBits(url, videoInfo, options = {}, bot, chatId, timeLogger) {
   return new Promise(async (resolve, reject) => {
     const outputPath = 'temp_videos';
